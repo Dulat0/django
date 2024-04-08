@@ -1,0 +1,29 @@
+from django.db import models
+from django.contrib.auth.models import User
+
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+
+class Product(models.Model):
+    name = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    comment = models.TextField()
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    text = models.TextField()
+
+class Like(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+
+class ObtainTokenPairWithInfo(models.Model)
+    name = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    
