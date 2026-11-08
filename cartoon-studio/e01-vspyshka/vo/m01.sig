@@ -1,0 +1,1 @@
+[{"at": 141.0, "id": "m01", "text": "Её — в автобус. | А ты — в другой.", "who": "M"}, {"engine": "edge", "fx": "highpass=f=180,lowpass=f=2400,equalizer=f=900:t=q:w=1:g=4,acompressor=threshold=-18dB:ratio=3", "name": "Спасатель", "pitch": 88, "rate": 102, "shift": 1.0, "voice": "ru-RU-DmitryNeural"}]

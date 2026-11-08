@@ -1,0 +1,1 @@
+[{"at": 144.4, "id": "t07", "pitch": 112, "rate": 120, "text": "Вера! | Вера!", "who": "T"}, {"engine": "edge", "formant": "shifted", "fx": "equalizer=f=2600:t=q:w=1.5:g=2,deesser,acompressor=threshold=-18dB:ratio=2.5,aecho=0.85:0.5:24|41:0.07|0.04", "name": "Тёма", "pitch": 100, "rate": 106, "shift": 0.84, "voice": "ru-RU-SvetlanaNeural"}]

@@ -1,0 +1,1 @@
+[{"at": 41.3, "id": "n05", "rate": 90, "text": "Стоп. | Это ошибка.", "who": "N"}, {"engine": "edge", "fx": "equalizer=f=120:t=q:w=1:g=2.5,equalizer=f=3500:t=q:w=1.5:g=1.5,deesser,acompressor=threshold=-20dB:ratio=2.5:attack=10:release=150,aecho=0.85:0.5:24|41:0.07|0.04", "name": "Рассказчик", "pitch": 94, "rate": 93, "shift": 1.0, "voice": "ru-RU-DmitryNeural"}]
