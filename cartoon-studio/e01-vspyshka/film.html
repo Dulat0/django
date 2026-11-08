@@ -7,7 +7,7 @@
 body{margin:0;background:#111;display:grid;place-items:center;min-height:100vh;color:#ccc;font:14px sans-serif}canvas{max-width:100vw;max-height:92vh}
 </style>
 <canvas id="c"></canvas>
-<div><input id="s" type="range" min="0" max="4859" value="0" style="width:60vw"> <span id="i"></span></div>
+<div><input id="s" type="range" min="0" max="5300" value="0" style="width:60vw"> <span id="i"></span></div>
 <script src="core.js"></script>
 <script src="cast.js"></script>
 <script src="sets.js"></script>
@@ -17,7 +17,7 @@ body{margin:0;background:#111;display:grid;place-items:center;min-height:100vh;c
 'use strict';
 setFormat({ ar: '9:16', width: 1080 });
 const CV = document.getElementById('c'); CV.width = OUT_W; CV.height = OUT_H; const g = CV.getContext('2d');
-window.__N = Math.round(DUR * FPS);
+window.__N = Math.round(DUR_REAL * FPS);
 window.__frame = i => { drawFilm(g, i / FPS); return CV.toDataURL('image/png'); };
 const s = document.getElementById('s'), lab = document.getElementById('i');
 s.oninput = () => { drawFilm(g, s.value / FPS); lab.textContent = (s.value / FPS).toFixed(2) + ' с'; };

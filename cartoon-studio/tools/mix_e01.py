@@ -7,15 +7,15 @@ from scipy.signal import butter, sosfilt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EP = os.path.join(ROOT, 'e01-vspyshka'); SFX = os.path.join(ROOT, 'sfx')
-SR = 48000; DUR = 162.0; N = int(SR * DUR)
+SR = 48000
 rng = np.random.default_rng(3)
 
 def load(p):
     sr, x = wavfile.read(p); x = x.astype(np.float32) / 32768
     if x.ndim == 1: x = np.stack([x, x], 1)
     assert sr == SR, p; return x
-def place(buf, x, at, g=1.):
-    i = int(at * SR); n = min(len(x), len(buf) - i)
+def place(buf, x, at, g=1., real=False):   # at — время по сценарию; переводим в экранное
+    i = int((at if real else G(at)) * SR); n = min(len(x), len(buf) - i)
     if n > 0 and i >= 0: buf[i:i + n] += x[:n] * g
 def lp(x, f): return sosfilt(butter(2, f, 'lowpass', fs=SR, output='sos'), x, axis=0)
 def t_(d): return np.arange(int(d * SR)) / SR
@@ -23,9 +23,13 @@ def t_(d): return np.arange(int(d * SR)) / SR
 # ---------- тайминг реплик ----------
 js = open(os.path.join(EP, 'vo_timing.js'), encoding='utf-8').read()
 VO = json.loads(re.search(r'const VO = (\[.*?\]);', js, re.S).group(1)); VOI = {v['id']: v for v in VO}
-def word_at(i, w): v = VOI[i]; k = v['text'].find(w); return v['at'] + v['dur'] * max(0, k) / len(v['text'])
+WARP = np.array(json.loads(re.search(r'const WARP = (\[.*?\]);', js, re.S).group(1)))
+G = lambda x: float(np.interp(x, WARP[:, 0], WARP[:, 1]))      # сценарий -> экран
+Ginv = lambda x: float(np.interp(x, WARP[:, 1], WARP[:, 0]))   # экран -> сценарий
+def word_at(i, w): v = VOI[i]; k = v['text'].find(w); return Ginv(v['at'] + v['dur'] * max(0, k) / len(v['text']))
 
 # ---------- музыка ----------
+DUR = float(WARP[-1, 1]) + .5; N = int(SR * DUR)
 M = np.zeros((N, 2))
 NOTE = {n: 440 * 2 ** ((i - 9) / 12) for i, n in enumerate('C C# D D# E F F# G G# A A# B'.split())}
 def hz(s): n, o = s[:-1], int(s[-1]); return NOTE[n] * 2 ** (o - 4)
@@ -132,13 +136,13 @@ for k in range(20): cue('clock-tick', 156.4 + k * .06, .5)
 # ---------- озвучка и приглушение музыки ----------
 V = np.zeros((N, 2)); duck = np.zeros(N)
 for v in VO:
-    x = load(os.path.join(EP, 'vo', v['id'] + '.wav')); place(V, x, v['at'])
+    x = load(os.path.join(EP, 'vo', v['id'] + '.wav')); place(V, x, v['at'], real=True)
     i, j = int((v['at'] - .25) * SR), int((v['at'] + v['dur'] + .35) * SR); duck[max(0, i):j] = 1
 k = int(.25 * SR); cs = np.concatenate([[0], np.cumsum(duck)]); idx = np.arange(N)
 duck = (cs[np.minimum(N, idx + k // 2)] - cs[np.maximum(0, idx - k // 2)]) / k   # скользящее среднее
 M *= (1 - .65 * duck)[:, None]
-M[int(85.5 * SR):int(86.8 * SR)] = 0                                          # тишина перед ударом
-M[int(155.6 * SR):int(156.3 * SR)] *= 0
+M[int(G(85.5) * SR):int(G(86.8) * SR)] = 0                                          # тишина перед ударом
+M[int(G(155.6) * SR):int(G(156.3) * SR)] *= 0
 MIX = M * .8 + FX * .55 + V * 1.0
 peak = np.max(np.abs(MIX)); MIX = MIX / peak * .95
 wavfile.write(os.path.join(EP, 'out', 'mix.wav'), SR, (MIX * 32767).astype(np.int16))

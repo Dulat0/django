@@ -1,0 +1,1 @@
+[{"at": 128.6, "id": "r01", "rate": 104, "text": "Внимание! Радиационная опасность! | Всем, у кого плохое самочувствие, — к автобусу!", "who": "R"}, {"engine": "edge", "fx": "highpass=f=450,lowpass=f=3200,acrusher=bits=9:mix=0.2,volume=3,aecho=0.8:0.7:140|280:0.35|0.2", "name": "Громкоговоритель", "pitch": 96, "rate": 100, "shift": 1.0, "voice": "ru-RU-DmitryNeural"}]

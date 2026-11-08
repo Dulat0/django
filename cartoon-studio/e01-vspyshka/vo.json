@@ -2,41 +2,47 @@
  "voices": {
   "N": {
    "name": "Рассказчик",
-   "voice": "mikhail",
-   "rate": 96,
-   "pitch": 100,
+   "engine": "edge",
+   "voice": "ru-RU-DmitryNeural",
+   "rate": 93,
+   "pitch": 94,
    "shift": 1.0,
-   "fx": "equalizer=f=140:t=q:w=1:g=3,equalizer=f=3200:t=q:w=1.5:g=2,deesser,acompressor=threshold=-20dB:ratio=3:attack=8:release=120,aecho=0.85:0.6:28|47:0.10|0.06"
+   "fx": "equalizer=f=120:t=q:w=1:g=2.5,equalizer=f=3500:t=q:w=1.5:g=1.5,deesser,acompressor=threshold=-20dB:ratio=2.5:attack=10:release=150,aecho=0.85:0.5:24|41:0.07|0.04"
   },
   "T": {
    "name": "Тёма",
-   "voice": "aleksandr",
-   "rate": 108,
+   "engine": "edge",
+   "voice": "ru-RU-SvetlanaNeural",
+   "rate": 106,
    "pitch": 100,
-   "shift": 1.19,
-   "fx": "equalizer=f=250:t=q:w=1:g=-2,equalizer=f=2800:t=q:w=1.5:g=3,deesser,acompressor=threshold=-18dB:ratio=3:attack=5:release=80,aecho=0.8:0.4:18|29:0.10|0.05"
+   "shift": 0.84,
+   "formant": "shifted",
+   "fx": "equalizer=f=2600:t=q:w=1.5:g=2,deesser,acompressor=threshold=-18dB:ratio=2.5,aecho=0.85:0.5:24|41:0.07|0.04"
   },
   "V": {
    "name": "Вера",
-   "voice": "anna",
-   "rate": 104,
-   "pitch": 98,
-   "shift": 1.0,
-   "fx": "equalizer=f=220:t=q:w=1:g=2,equalizer=f=4500:t=q:w=1.5:g=-2,deesser,acompressor=threshold=-18dB:ratio=3:attack=5:release=80,aecho=0.8:0.4:18|29:0.10|0.05"
-  },
-  "R": {
-   "name": "Громкоговоритель",
-   "voice": "pavel",
+   "engine": "edge",
+   "voice": "ru-RU-SvetlanaNeural",
    "rate": 100,
    "pitch": 100,
    "shift": 1.0,
-   "fx": "highpass=f=450,lowpass=f=3200,acrusher=bits=9:mix=0.25,volume=3,aecho=0.8:0.7:140|280:0.35|0.2"
+   "fx": "equalizer=f=200:t=q:w=1:g=1.5,deesser,acompressor=threshold=-18dB:ratio=2.5,aecho=0.85:0.5:24|41:0.07|0.04"
+  },
+  "R": {
+   "name": "Громкоговоритель",
+   "engine": "edge",
+   "voice": "ru-RU-DmitryNeural",
+   "rate": 100,
+   "pitch": 96,
+   "shift": 1.0,
+   "fx": "highpass=f=450,lowpass=f=3200,acrusher=bits=9:mix=0.2,volume=3,aecho=0.8:0.7:140|280:0.35|0.2"
   },
   "M": {
    "name": "Спасатель",
-   "voice": "yuriy",
+   "engine": "edge",
+   "voice": "ru-RU-DmitryNeural",
    "rate": 102,
-   "pitch": 96,
+   "pitch": 88,
    "shift": 1.0,
    "fx": "highpass=f=180,lowpass=f=2400,equalizer=f=900:t=q:w=1:g=4,acompressor=threshold=-18dB:ratio=3"
   }
@@ -250,5 +256,6 @@
    "at": 156.4,
    "text": "Продолжение следует. | Подпишись, чтобы узнать, что было дальше."
   }
- ]
+ ],
+ "duration": 162
 }

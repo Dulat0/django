@@ -4,11 +4,16 @@
 
 const FPS = 30, DUR = 162;
 const pr = (t, a, b, e = easeIO) => e(clamp((t - a) / (b - a), 0, 1));
+// время: сцены живут во времени сценария (t), экран — в реальном (растянуто там, где реплика длиннее места)
+function warpF(x, inv = false) { const P = WARP, a = inv ? 1 : 0, b = inv ? 0 : 1;
+  for (let i = 1; i < P.length; i++) if (x <= P[i][a] || i === P.length - 1) { const u = (x - P[i - 1][a]) / ((P[i][a] - P[i - 1][a]) || 1); return P[i - 1][b] + u * (P[i][b] - P[i - 1][b]); } return x; }
+const toScreen = x => warpF(x), toScript = x => warpF(x, true);
+const DUR_REAL = toScreen(DUR);
 const VOI = Object.fromEntries(VO.map(v => [v.id, v]));
-function speaking(who, t) { return VO.some(v => v.who === who && t >= v.at && t < v.at + v.dur); }
+function speaking(who, t) { const r = toScreen(t); return VO.some(v => v.who === who && r >= v.at && r < v.at + v.dur); }
 function flap(t, open = 'O', closed = 'neutral') { return noise1(t * 11, 3) > -.1 ? open : closed; }
 function blink(t, off = 0) { return ((t + off) % 3.9) < .12; }
-function wordAt(id, word) { const v = VOI[id], i = v.text.indexOf(word); return v.at + v.dur * Math.max(0, i) / v.text.length; }
+function wordAt(id, word) { const v = VOI[id], i = v.text.indexOf(word); return toScript(v.at + v.dur * Math.max(0, i) / v.text.length); }
 function camera(c, x, y, z = 1, shake = 0, t = 0) {
   resetT(c); c.translate(W / 2 + noise1(t * 37, 1) * shake, H / 2 + noise1(t * 41, 2) * shake); c.scale(z, z); c.translate(-x, -y);
 }
@@ -361,9 +366,10 @@ function subtitlesAt(c, t) {
   lines.forEach((ln, k) => { const yy = y + k * 64; c.strokeStyle = 'rgba(20,14,20,.92)'; c.lineWidth = 13; c.strokeText(ln, CX, yy); c.fillStyle = cue.who === 'V' ? '#ffd8c9' : cue.who === 'T' ? '#d6e8ff' : '#fff'; c.fillText(ln, CX, yy); });
   c.restore();
 }
-function drawFilm(c, t) {
+function drawFilm(c, real) {
+  const t = toScript(real);
   const sc = SCENES.find(s => t >= s[0] && t < s[1]) || SCENES[SCENES.length - 1];
   resetT(c); c.clearRect(0, 0, W, H); sc[2](c, t, t - sc[0]);
   if (t > 118.6 && t < 156) { resetT(c); label(c, 'ДАЛЬШЕ — ВЫМЫСЕЛ', 220, 110, { size: 28, bg: '#fff3c4', rot: -.03 }); }
-  subtitlesAt(c, t);
+  subtitlesAt(c, real);
 }

@@ -1,0 +1,1 @@
+[{"at": 60.9, "id": "v01", "pitch": 106, "rate": 112, "text": "Тёма! От окна!", "who": "V"}, {"engine": "edge", "fx": "equalizer=f=200:t=q:w=1:g=1.5,deesser,acompressor=threshold=-18dB:ratio=2.5,aecho=0.85:0.5:24|41:0.07|0.04", "name": "Вера", "pitch": 100, "rate": 100, "shift": 1.0, "voice": "ru-RU-SvetlanaNeural"}]
