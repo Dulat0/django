@@ -18,6 +18,8 @@
 - `pr2,1.py`: импорты перепутаны, есть синтаксические ошибки, не определён `CustomTokenObtainPairSerializer`
 - `1.1`: в конце лишний класс `ObtainTokenPairWithInfo` без `:`
 - `1.3`: маршрут `token/` ссылается на неимпортированный `ObtainTokenPairWithInfo`
+- `2,2.py`: импортирует `UserCreate` и `ObtainTokenPairWithInfo` из `.views`, хотя они определены в `pr2,1.py`
+- `2,5.py`: `get_queryset` вручную дублирует работу `OrderingFilter`; по умолчанию сортирует по заглушке `'default_field_to_sort'`
 
 ## Как работать
 - Файлы маленькие (до 35 строк), их можно читать целиком; исследовать репозиторий не нужно.
