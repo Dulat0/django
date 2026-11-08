@@ -133,21 +133,44 @@ function temaHead(c, x, y, f, back = false, s = 1) {
 }
 function temaNeck(c, x, y, w = 30, h = 40) { shp(c, [[x - w / 2, y], [x + w / 2, y], [x + w / 2 + 2, y + h], [x - w / 2 - 2, y + h]], C.skin, 4, 240, { shade: sideShade(C.skinSh, x + w / 2, y + h / 2, w * .4, h) }); }
 // поза 'back': со спины у окна, телефон поднят
-function temaBack(c) {
+const lerpPts = (A, B, u) => A.map((p, i) => [lerp(p[0], B[i][0], u), lerp(p[1], B[i][1], u)]);
+function temaLegs(c) {
   for (const sx of [-1, 1]) {
     taper(c, [[sx * 36, -330], [sx * 40, -175], [sx * 42, -30]], [64, 50, 40], C.jeans, 250 + sx, { shade: sideShade(C.jeansSh, sx * 60, -180, 20, 200) });
     shp(c, [[sx * 42 - 26, -36], [sx * 42 + 26, -36], [sx * 42 + 30, 0], [sx * 42 - 30, 0]], C.sneaker, 4, 252 + sx, { corner: .4 });
   }
+}
+// стоит лицом к зрителю; f.armsUp 0..1 — руки вскинуты от испуга
+function temaStand(c, f = {}) {
+  temaLegs(c);
+  temaNeck(c, 0, -642, 32, 46);
+  shp(c, [[-82, -606], [82, -606], [92, -470], [86, -330], [-86, -330], [-92, -470]], C.hoodie, 5, 255,
+    { shade: q => { sideShade(C.hoodieSh, 80, -460, 40, 160)(q); q.fillStyle = C.hoodieSh; q.fillRect(-100, -352, 200, 30); } });
+  shp(c, [[-50, -614], [50, -614], [36, -570], [-36, -570]], C.hoodieSh, 4, 262);
+  inkLine(c, [[-16, -590], [-20, -520]], 2.5, 263); inkLine(c, [[16, -590], [20, -520]], 2.5, 264);
+  shp(c, [[-56, -440], [56, -440], [62, -372], [-62, -372]], C.hoodieSh, 3.5, 265, { corner: .3 });
+  const u = f.armsUp || 0;
+  for (const sx of [-1, 1]) {
+    const A = lerpPts([[sx * 78, -590], [sx * 104, -470], [sx * 98, -360]], [[sx * 78, -590], [sx * 130, -560], [sx * 120, -660]], u);
+    taper(c, A, [40, 34, 30], C.hoodie, 266 + sx, { shade: sideShade(C.hoodieSh, sx * 100, -480, 10, 100) });
+    hand(c, A[2][0], A[2][1] + (u > .5 ? -14 : 14), 17, u > .5 ? Math.PI : 0, 268 + sx);
+  }
+  temaHead(c, 0, -700, f);
+}
+function temaBack(c, arm = 1) {
+  temaLegs(c);
   temaNeck(c, 0, -642, 32, 46);
   shp(c, [[-82, -606], [82, -606], [92, -470], [86, -330], [-86, -330], [-92, -470]], C.hoodie, 5, 255,
     { shade: q => { sideShade(C.hoodieSh, 80, -460, 40, 160)(q); q.fillStyle = C.hoodieSh; q.fillRect(-100, -352, 200, 30); } });
   shp(c, [[-56, -612], [56, -612], [44, -530], [0, -510], [-44, -530]], C.hoodieSh, 4, 256);                                 // капюшон
   taper(c, [[-78, -590], [-104, -470], [-98, -360]], [40, 34, 30], C.hoodie, 257, { shade: sideShade(C.hoodieSh, -86, -470, 10, 120) });
   hand(c, -98, -345, 17, 0, 258);
-  taper(c, [[78, -592], [134, -690], [146, -800]], [40, 34, 30], C.hoodie, 259, { shade: sideShade(C.hoodieSh, 150, -700, 14, 120) });
-  shp(c, [[118, -900], [176, -896], [172, -800], [114, -804]], '#22252e', 4, 260, { corner: .3 });                       // телефон
-  c.save(); c.globalAlpha = .9; c.fillStyle = '#ffe9a8'; c.fillRect(124, -892, 44, 80); c.restore();
-  hand(c, 146, -812, 17, -.2, 261);
+  const A = lerpPts([[78, -592], [102, -470], [98, -360]], [[78, -592], [134, -690], [146, -800]], arm);
+  taper(c, A, [40, 34, 30], C.hoodie, 259, { shade: sideShade(C.hoodieSh, A[1][0] + 14, A[1][1], 14, 120) });
+  const hx = A[2][0], hy = A[2][1] - 12;
+  if (arm > .55) { shp(c, [[hx - 28, hy - 88], [hx + 30, hy - 84], [hx + 26, hy + 12], [hx - 32, hy + 8]], '#22252e', 4, 260, { corner: .3 });   // телефон
+    c.save(); c.globalAlpha = .9; c.fillStyle = '#ffe9a8'; c.fillRect(hx - 22, hy - 80, 44, 80); c.restore(); }
+  hand(c, hx, hy, 17, -.2, 261);
   temaHead(c, 0, -700, {}, true);
 }
 // поза 'sit': за столом; (0,0) — уровень столешницы под центром
@@ -167,7 +190,7 @@ function temaSit(c, f) {
   hand(c, 78, -346, 17, -.3, 279);
 }
 // поза 'crouch': сидит на полу у стены, колени к груди, руки на голове
-function crouchBody(c, cloth, clothSh, legs, legsSh, shoe, seed, head) {
+function crouchBody(c, cloth, clothSh, legs, legsSh, shoe, seed, head, knees = false) {
   shp(c, [[-76, -400], [76, -400], [80, -220], [70, -60], [-70, -60], [-80, -220]], cloth, 5, seed + 6, { shade: sideShade(clothSh, 80, -220, 36, 180) });
   for (const sx of [-1, 1]) {
     taper(c, [[sx * 40, -300], [sx * 52, -160], [sx * 62, -40]], [64, 50, 38], legs, seed + 7 + sx, { shade: sideShade(legsSh, sx * 100, -150, 12, 110) });   // голень
@@ -176,12 +199,13 @@ function crouchBody(c, cloth, clothSh, legs, legsSh, shoe, seed, head) {
   }
   head();
   for (const sx of [-1, 1]) {
+    if (knees) { taper(c, [[sx * 74, -388], [sx * 96, -330], [sx * 50, -318]], [38, 32, 28], cloth, seed + 8 + sx, { shade: sideShade(clothSh, sx * 100, -340, 10, 30) }); hand(c, sx * 40, -318, 17, sx * 1.5, seed + 10 + sx); continue; }
     taper(c, [[sx * 74, -388], [sx * 116, -480], [sx * 40, -548]], [38, 32, 28], cloth, seed + 8 + sx, { shade: sideShade(clothSh, sx * 120, -470, 10, 60) });
     hand(c, sx * 32, -552, 17, sx * 1.4, seed + 10 + sx);
   }
 }
-function temaCrouch(c, f) {
-  crouchBody(c, C.hoodie, C.hoodieSh, C.jeans, C.jeansSh, C.sneaker, 290, () => { temaNeck(c, 0, -440, 30, 40); temaHead(c, 0, -490, f); });
+function temaCrouch(c, f, knees = false) {
+  crouchBody(c, C.hoodie, C.hoodieSh, C.jeans, C.jeansSh, C.sneaker, 290, () => { temaNeck(c, 0, -440, 30, 40); temaHead(c, 0, -490, f); }, knees);
 }
 
 // ---------- Вера (22 года): рост ~820 ----------
@@ -195,7 +219,7 @@ function veraTorso(c, y0) {   // свитер с высоким горлом, п
   shp(c, [[-24, y0 - 34], [24, y0 - 34], [28, y0 + 6], [-28, y0 + 6]], C.sweater, 4, 352, { shade: sideShade(C.sweaterSh, 26, y0 - 14, 10, 30) });
 }
 // поза 'shout': стоит, указывает рукой влево, кричит
-function veraShout(c, f) {
+function veraShout(c, f, point = 1) {
   for (const sx of [-1, 1]) {
     taper(c, [[sx * 34, -400], [sx * 32, -210], [sx * 30, -40]], [62, 44, 32], C.vJeans, 360 + sx, { shade: sideShade('#1c2539', sx * 46, -210, 12, 200) });
     shp(c, [[sx * 30 - 22, -100], [sx * 30 + 22, -100], [sx * 30 + 26, -8], [sx * 30 + 34, 0], [sx * 30 - 26, 0], [sx * 30 - 24, -40]], C.boot, 4, 362 + sx, { corner: .3 });
@@ -204,11 +228,12 @@ function veraShout(c, f) {
   taper(c, [[66, -655], [104, -560], [112, -470]], [34, 28, 24], C.sweater, 365, { shade: sideShade(C.sweaterSh, 116, -560, 10, 90) });
   hand(c, 112, -456, 15, 0, 366);
   veraHead(c, 0, -770, f);
-  taper(c, [[-64, -655], [-150, -630], [-236, -654]], [34, 28, 24], C.sweater, 367, { shade: sideShade(C.sweaterSh, -150, -616, 80, 8) });
-  hand(c, -252, -656, 15, -1.6, 368, { point: true });
+  const A = lerpPts([[-64, -655], [-100, -560], [-110, -470]], [[-64, -655], [-150, -630], [-236, -654]], point);
+  taper(c, A, [34, 28, 24], C.sweater, 367, { shade: sideShade(C.sweaterSh, A[1][0], A[1][1] + 14, 40, 10) });
+  if (point > .6) hand(c, A[2][0] - 16, A[2][1] - 2, 15, -1.6, 368, { point: true }); else hand(c, A[2][0], A[2][1] + 14, 15, 0, 368);
 }
-function veraCrouch(c, f) {
-  crouchBody(c, C.sweater, C.sweaterSh, C.vJeans, '#1c2539', C.boot, 380, () => { veraNeck(c, 0, -446); veraHead(c, 0, -500, f); });
+function veraCrouch(c, f, knees = false) {
+  crouchBody(c, C.sweater, C.sweaterSh, C.vJeans, '#1c2539', C.boot, 380, () => { veraNeck(c, 0, -446); veraHead(c, 0, -500, f); }, knees);
 }
 
 // ---------- Бублик (реалистичнее: меньше голова, миндалевидные глаза) ----------

@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Серия 5 · Вспышка в небе</title>
+<style>
+@font-face{font-family:Rubik;font-weight:800;src:url(../fonts/rubik-cyrillic-800-normal.woff2);unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:Rubik;font-weight:800;src:url(../fonts/rubik-latin-800-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F,U+2190-25FF}
+body{margin:0;background:#111;display:grid;place-items:center;min-height:100vh;color:#ccc;font:14px sans-serif}canvas{max-width:100vw;max-height:92vh}
+</style>
+<canvas id="c"></canvas>
+<div><input id="s" type="range" min="0" max="5399" value="0" style="width:60vw"> <span id="i"></span></div>
+<script src="core.js"></script>
+<script src="cast.js"></script>
+<script src="sets.js"></script>
+<script src="vo_timing.js"></script>
+<script src="film.js"></script>
+<script>
+'use strict';
+setFormat({ ar: '9:16', width: 1080 });
+const CV = document.getElementById('c'); CV.width = OUT_W; CV.height = OUT_H; const g = CV.getContext('2d');
+window.__N = Math.round(DUR * FPS);
+window.__frame = i => { drawFilm(g, i / FPS); return CV.toDataURL('image/png'); };
+const s = document.getElementById('s'), lab = document.getElementById('i');
+s.oninput = () => { drawFilm(g, s.value / FPS); lab.textContent = (s.value / FPS).toFixed(2) + ' с'; };
+document.fonts.load('800 50px Rubik', 'Чя12◀').then(() => { drawFilm(g, 0); window.__ready = true; });
+</script>

@@ -13,12 +13,13 @@ function wallpaper(c, x, y, w, h, base, motif, seed) {
 }
 
 // ---------- город за окном ----------
+let BALL = .7;   // положение болида на траектории 0..1
 function cityOutside(c, k, [x, y, w, h], ball = true) {
   const g = c.createLinearGradient(0, y, 0, y + h);
   g.addColorStop(0, mix('#86b6dc', '#fffbe9', k)); g.addColorStop(1, mix('#dcebf5', '#ffe6a6', k));
   c.fillStyle = g; c.fillRect(x, y, w, h);
   const s = w / 520, by = y + h;   // масштаб города под окно
-  if (k > 0 && ball) fireball(c, x + w * .78, y + h * .17, k, s);
+  if (ball && BALL > 0) fireball(c, x + w * lerp(.15, .9, BALL), y + h * lerp(-.08, .3, BALL), k, s);
   for (const [tx, th] of [[.12, .5], [.24, .42]]) {
     const X = x + w * tx, T = h * th;
     shp(c, [[X - 12 * s, by], [X - 8 * s, by - T], [X + 8 * s, by - T], [X + 12 * s, by]], mix('#b5bccb', '#fff1cc', k * .6), 3, tx * 100, { corner: .1 });
