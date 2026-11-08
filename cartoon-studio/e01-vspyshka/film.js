@@ -1,8 +1,8 @@
 'use strict';
-// Серия 5 «Вспышка в небе: правило Челябинска». 180 с, 30 к/с, 1080×1920.
+// «Сигнал тревоги», серия 1 «Вспышка в небе». 134 с, 30 к/с, 1080×1920.
 // Каждая сцена — чистая функция времени: scene(c, t, u), t — время фильма, u — время от начала сцены.
 
-const FPS = 30, DUR = 180;
+const FPS = 30, DUR = 134;
 const pr = (t, a, b, e = easeIO) => e(clamp((t - a) / (b - a), 0, 1));
 const VOI = Object.fromEntries(VO.map(v => [v.id, v]));
 function speaking(who, t) { return VO.some(v => v.who === who && t >= v.at && t < v.at + v.dur); }
@@ -70,35 +70,49 @@ function s1(c, t) {
   resetT(c); c.save(); c.globalCompositeOperation = 'multiply'; c.fillStyle = '#4a3a52'; c.globalAlpha = .55; c.fillRect(0, 0, W, H); c.restore();
   glow(c, 760, 330, 500, '#fff1b8', 1);
   fade(c, 1 - pr(t, .5, 1.6), '#fff'); fade(c, 1 - pr(t, 0, .5), '#000');
-  const a1 = pr(t, .9, 1.4), a2 = pr(t, 3.6, 4.0, easeOutBack), a3 = pr(t, 5.1, 5.6);
+  const a1 = pr(t, .9, 1.4), a2 = pr(t, 3.3, 3.7, easeOutBack), a3 = pr(t, 5.1, 5.6);
   txt(c, 'Если небо вспыхнуло\nярче солнца —', CX, 1180, 62, '#fff', { stroke: INK, alpha: a1 });
   if (a2 > 0) { c.save(); c.translate(CX, 1420); c.scale(a2, a2); c.rotate(-.04); txt(c, 'НЕ ПОДХОДИ\nК ОКНУ', 0, 0, 104, RED, { stroke: '#fff' }); c.restore(); }
   txt(c, 'Самое опасное придёт\nчерез минуту', CX, 1720, 50, '#fff', { stroke: INK, alpha: a3 });
-  fade(c, pr(t, 8.1, 8.5), '#000');
+  fade(c, pr(t, 8.2, 8.6), '#000');
 }
 // 2. 8.5–22: обычное утро
 function s2(c, t, u) {
-  if (u < 4.6) {   // снаружи: двор, камера наезжает на окно
-    const z = lerp(1, 1.7, pr(u, 0, 4.6, easeInOutSine));
+  if (u < 2.8) {   // снаружи: двор, камера наезжает на окно
+    const z = lerp(1, 1.7, pr(u, 0, 2.8, easeInOutSine));
     camera(c, 540, 1000, z); BALL = 0; cityOutside(c, 0, [-200, -100, 1480, 2200], false);
     fade(c, 1 - pr(u, 0, .5), '#000');
     resetT(c); label(c, 'Челябинск · 15 февраля 2013 · 9:20', CX, 230, { size: 40 });
-    fade(c, pr(u, 4.2, 4.6), '#fff'); return;
+    fade(c, pr(u, 2.4, 2.8), '#fff'); return;
   }
-  const v = u - 4.6; BALL = 0;
-  camera(c, 560, 960, lerp(1.12, 1.0, pr(v, 0, 8.9, easeInOutSine)));
+  const v = u - 2.8; BALL = 0;
+  camera(c, 560, 960, lerp(1.12, 1.0, pr(v, 0, 8.2, easeInOutSine)));
   kitchen(c, 0);
   at(c, 380, 1040, .5, () => bublik(c, 'sill'));
   const chew = speaking('N', t) ? (Math.floor(t * 4) % 2 ? 'chew' : 'neutral') : 'chew';
   at(c, 600, 1290 + Math.sin(t * 2) * 2, 1, () => temaSit(c, { eyes: blink(t) ? 'shut' : 'open', look: [.6, .3], mouth: chew, brows: 'calm' }));
   table(c);
+  const vx = lerp(860, 1350, pr(t, 22.2, 23.8, easeInOutSine)), step = t > 22.2 && t < 23.8 ? Math.abs(Math.sin(t * 9)) * -12 : 0;
+  at(c, vx, 1800 + step, 1.05, () => veraShout(c, { eyes: blink(t, 1.3) ? 'shut' : 'open', look: [-1, .2], brows: 'calm', mouth: 'smile' }, 0));
   fade(c, 1 - pr(v, 0, .4), '#fff');
+}
+// заставка сериала
+function sTitle(c, t, u) {
+  resetT(c); c.fillStyle = '#140d14'; c.fillRect(0, 0, W, H);
+  for (let k = 0; k < 2; k++) { const a = u * 3.2 + k * Math.PI; c.save(); c.translate(CX, 640); c.rotate(a); c.globalCompositeOperation = 'screen';
+    const g = c.createLinearGradient(0, 0, 1400, 0); g.addColorStop(0, alpha('#ff2a2a', .55)); g.addColorStop(1, alpha('#ff2a2a', 0)); c.fillStyle = g;
+    c.beginPath(); c.moveTo(0, 0); c.lineTo(1400, -260); c.lineTo(1400, 260); c.fill(); c.restore(); }
+  glow(c, CX, 640, 160, '#ff5a4a', 1); shp(c, ellPts(CX, 640, 70, 70), '#ff4a3a', 6, 1700, { color: '#fff' });
+  const a = pr(u, .2, .7, easeOutBack); c.save(); c.translate(CX, 1000); c.scale(a, a); txt(c, 'СИГНАЛ\nТРЕВОГИ', 0, 0, 150, '#fff', { stroke: '#c0172b' }); c.restore();
+  txt(c, 'СЕРИЯ 1', CX, 1330, 50, '#e8c35a', { alpha: pr(u, 1.2, 1.6) });
+  txt(c, '«Вспышка в небе»', CX, 1410, 60, '#fff', { alpha: pr(u, 1.6, 2.0) });
+  fade(c, 1 - pr(u, 0, .3), '#000'); fade(c, pr(u, 4.0, 4.4), '#000');
 }
 // 3. 22–40.3: вспышка
 function s3(c, t, u) {
-  const k = pr(t, 23, 25.5); BALL = lerp(.05, .75, pr(t, 22.4, 33, x => x));
+  const k = pr(t, 25, 27.5); BALL = lerp(.05, .75, pr(t, 24.4, 35, x => x));
   if (u < 5) {   // кухня заливается светом
-    camera(c, 560, 960, 1, shakeAt(t, 24, 6, 1));
+    camera(c, 560, 960, 1, shakeAt(t, 26, 6, 1));
     kitchen(c, k); roomLight(c, k);
     at(c, 380, 1040, .5, () => bublik(c, u > 2.5 ? 'hiss' : 'sill'));
     at(c, 600, 1290, 1, () => temaSit(c, { eyes: u > 2.6 ? 'wide' : 'open', look: [.6, -1], mouth: u > 2.6 ? 'O' : 'chew', brows: u > 2.6 ? 'up' : 'calm' }));
@@ -127,7 +141,7 @@ function s4(c, t, u) {
     const a = pr(u, .1, .45, easeOutBack); c.save(); c.translate(CX, 760); c.rotate(-.12); c.scale(a, a);
     shp(c, rectPts(-330, -90, 660, 180), alpha('#fff', .85), 10, 1300, { color: RED, corner: .1 }); txt(c, 'ОШИБКА', 0, 6, 120, RED); c.restore(); return;
   }
-  if (u < 12.3) {   // схема: свет мгновенно, волна — минуты
+  if (u < 11.2) {   // схема: свет мгновенно, волна — минуты
     const v = u - 2.2; paperBg(c, '#eaf2f7');
     const gy = 1360, ex = 200, ey = 430, cx2 = 860;
     c.fillStyle = '#d8e6c8'; c.fillRect(0, gy, W, H - gy); inkLine(c, [[0, gy], [W, gy]], 6, 1310);
@@ -147,7 +161,7 @@ function s4(c, t, u) {
     txt(c, 'до удара по окнам', 810, 920, 34, INK);
     return;
   }
-  const v = u - 12.3; paperBg(c, '#f6e9e4');   // факты 2013 года
+  const v = u - 11.2; paperBg(c, '#f6e9e4');   // факты 2013 года
   const n = Math.round(pr(v, .2, 2.2, easeOutExpo) * 1500);
   txt(c, '15 февраля 2013', CX, 330, 48, INK);
   txt(c, '≈' + n.toLocaleString('ru-RU'), CX, 620, 190, RED);
@@ -157,7 +171,7 @@ function s4(c, t, u) {
 // 5. 59.4–76.5: перемотка, Вера, правила
 function s5(c, t, u) {
   if (u < 1.4) {   // перемотка назад по сцене 3
-    const tb = 40.2 - u * 11; s3(c, tb, tb - 22);
+    const tb = 40.9 - u * 11; s3(c, tb, tb - 24);
     resetT(c); c.save(); c.globalAlpha = .25; c.fillStyle = '#000'; for (let y = (t * 900) % 24; y < H; y += 24) c.fillRect(0, y, W, 6); c.restore();
     txt(c, '◀◀', CX, 300, 140, '#fff', { stroke: INK }); return;
   }
@@ -179,27 +193,28 @@ function s5(c, t, u) {
 }
 // 6. 76.5–95.3: ожидание, удар
 function s6(c, t, u) {
-  const B = 89.8;
+  const B = 86.8;
   if (t < B) {
     const breath = Math.sin(t * 3) * 3;
-    camera(c, 540, 1050, lerp(1.0, 1.25, pr(t, 76.5, 88.5, easeInOutSine)));
+    camera(c, 470, 1100, lerp(1.0, 1.45, pr(t, 75.5, 85.5, easeInOutSine)));
     corridor(c, 0);
-    at(c, 300, 1560 + breath, 1.05, () => veraCrouch(c, { eyes: 'shut', mouth: 'tense', brows: 'worry' }));
-    at(c, 560, 1580 - breath, 1.0, () => temaCrouch(c, { eyes: blink(t, 2) ? 'shut' : (t > 86 ? 'shut' : 'squint'), look: [.8, 0], mouth: 'tense', brows: 'worry' }));
+    const vt = speaking('V', t), tt = speaking('T', t);
+    at(c, 300, 1560 + breath, 1.05, () => veraCrouch(c, { eyes: vt || (t > 81.6 && t < 84.2) ? 'open' : 'shut', look: [1, .3], mouth: vt ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' }));
+    at(c, 560, 1580 - breath, 1.0, () => temaCrouch(c, { eyes: tt ? 'squint' : (blink(t, 2) ? 'shut' : (t > 84 ? 'shut' : 'squint')), look: [-.8, 0], mouth: tt ? flap(t, 'O', 'tense') : 'tense', brows: 'worry' }));
     at(c, 430, 1700, .5, () => bublik(c, 'flat'));
     resetT(c);
-    if (t < 88.5) { label(c, 'проходит минута…', CX, 230, { size: 40 }); }
+    if (t < 85.5) { label(c, 'проходит минута…', CX, 230, { size: 40 }); }
     return;
   }
-  if (t < 93.5) {   // крупный план: окно выбивает (замедленно)
+  if (t < 90.5) {   // крупный план: окно выбивает (замедленно)
     const v = (t - B) / 3.7;
     camera(c, 540, 960, 1, shakeAt(t, B, 40, 2.5), t);
     windowBlast(c, pr(v, 0, 1, x => Math.pow(x, .8)) * .95);
-    resetT(c); label(c, 'замедленно', 880, 1640, { size: 30, rot: .03 });
+    resetT(c); label(c, 'замедленно', 880, 1520, { size: 30, rot: .03 });
     fade(c, 1 - pr(t, B, B + .25), '#fff'); return;
   }
-  const v = (t - 93.5) / 1.8;   // коридор: осколки летят из проёма
-  camera(c, 540, 1050, 1.1, shakeAt(t, 93.5, 24, 2), t);
+  const v = (t - 90.5) / 1.8;   // коридор: осколки летят из проёма
+  camera(c, 540, 1050, 1.1, shakeAt(t, 90.5, 24, 2), t);
   const imp = corridor(c, 1);
   at(c, 300, 1560, 1.05, () => veraCrouch(c, { eyes: 'shut', mouth: 'tense', brows: 'worry' }));
   at(c, 560, 1580, 1.0, () => temaCrouch(c, { eyes: 'shut', mouth: 'tense', brows: 'worry' }));
@@ -225,135 +240,59 @@ function s7(c, t, u) {
     { at: wordAt('n12', 'Если кто-то'), icon: ICON.phone112, text: 'Есть раненые —\nзвони 112' },
     { at: wordAt('n12', 'И слушай'), icon: ICON.radio, text: 'Слушай МЧС,\nа не слухи' }], { y0: 430, step: 215 });
 }
-// 8. 115.5–125.5: взлёт в космос
-function spaceBg(c, t, o = {}) {
-  resetT(c); c.fillStyle = '#0c0f2b'; c.fillRect(0, 0, W, H);
-  const r = rng(5); for (let j = 0; j < 300; j++) { const tw = .5 + .5 * Math.sin(t * 2 + j); c.fillStyle = '#fff'; c.globalAlpha = (.25 + r() * .6) * (.7 + .3 * tw); c.fillRect(r() * W, r() * H, 2 + r() * 2.5, 2 + r() * 2.5); }
-  c.globalAlpha = 1;
-  const ey = o.earthY ?? 2800;
-  glow(c, 540, ey - 100, 1500, '#5fb7ff', .9);
-  const E = circPath(540, ey, 1300); c.fillStyle = '#2f73c9'; c.fill(E);
-  c.save(); c.clip(E); c.translate(-t * 4 % 400, 0);
-  for (const [x, y, rx, ry] of [[300, ey - 1180, 260, 90], [820, ey - 1100, 220, 120], [520, ey - 980, 300, 110], [1100, ey - 1150, 240, 90]]) shp(c, warp(ellPts(x, y, rx, ry), x, 18, true, 30), '#5ea85a', 5, x);
-  c.restore(); inkLine(c, ellPts(540, ey, 1300, 1300, 0, 120), 7, 800, true);
-}
-function asteroid(c, x, y, s, rot) {
-  c.save(); c.translate(x, y); c.rotate(rot); c.scale(s, s); c.translate(-600, -760);
-  const A = warp(ellPts(600, 760, 330, 270, .3), 21, 34, true, 40);
-  shp(c, A, '#8a7a6d', 7, 810, { shade: q => { hatchIn(q, rectPath(260, 480, 700, 600), [260, 480, 700, 600], { alpha: .35, angle: .5, gap: 10 }); q.fillStyle = alpha('#2a2230', .45); q.beginPath(); q.ellipse(720, 860, 300, 260, .3, 0, TAU); q.fill(); } });
-  for (const [px, py, rr] of [[520, 660, 50], [680, 820, 70], [460, 860, 34], [760, 620, 28]]) shp(c, ellPts(px, py, rr, rr * .75, .3), '#6f6156', 4, px);
-  c.restore();
+// 8. 110.5–126.5: крючок — нет сети, родители далеко
+function darkCorridor(c, d = .4) { resetT(c); c.save(); c.globalCompositeOperation = 'multiply'; c.fillStyle = mix('#ffffff', '#3a3f66', d); c.fillRect(0, 0, W, H); c.restore(); }
+function phoneScreen(c, t, noNet) {
+  paperBg(c, '#1a1620');
+  shp(c, rectPts(220, 260, 640, 1260), '#111318', 10, 1800, { corner: .08, color: '#000' });
+  c.fillStyle = '#20324f'; c.fillRect(250, 300, 580, 1180);
+  for (let k = 0; k < 4; k++) { c.fillStyle = noNet ? alpha('#ffffff', .25) : '#fff'; c.fillRect(290 + k * 18, 350 - k * 8, 12, 12 + k * 8); }
+  if (noNet) cross(c, 320, 345, 30);
+  txt(c, '10:01', 760, 345, 30, '#fff');
+  shp(c, ellPts(CX, 640, 120, 120), '#c99b8a', 5, 1801); txt(c, 'М', CX, 646, 110, '#fff');
+  txt(c, 'Мама', CX, 860, 70, '#fff');
+  if (!noNet) txt(c, 'Вызов' + '.'.repeat(1 + Math.floor(t * 3) % 3), CX, 950, 44, '#b9d0f0');
+  else { const a = pr(t, 115.3, 115.6, easeOutBack); c.save(); c.translate(CX, 960); c.scale(a, a); txt(c, 'НЕТ СЕТИ', 0, 0, 76, '#ff5a4a'); c.restore(); }
+  shp(c, ellPts(CX, 1330, 70, 70), '#e0443a', 5, 1802); inkLine(c, [[CX - 34, 1336], [CX + 34, 1336]], 12, 1803, false, { color: '#fff' });
 }
 function s8(c, t, u) {
-  const p = pr(u, 0, 7, easeInOutSine);
-  resetT(c);
-  const g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, mix('#86b6dc', '#0c0f2b', clamp(p * 1.4, 0, 1))); g.addColorStop(1, mix('#dcebf5', '#1b2a5a', clamp(p * 1.2, 0, 1)));
+  const tf = { eyes: blink(t, 2) ? 'shut' : 'open', look: [.3, 1], mouth: speaking('T', t) ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' };
+  const vf = { eyes: blink(t, 1) ? 'shut' : 'open', look: [1, .3], mouth: speaking('V', t) ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' };
+  const scene = (zx, zy, z) => {
+    camera(c, zx, zy, z); corridor(c, 0);
+    at(c, 300, 1560, 1.05, () => veraCrouch(c, vf, true));
+    at(c, 560, 1580, 1.0, () => temaCrouch(c, tf, true));
+    at(c, 430, 1700, .5, () => bublik(c, 'sill'));
+    at(c, 610, 1255, 1, () => { c.rotate(-.25); shp(c, rectPts(-26, -52, 52, 98), '#22252e', 4, 1810, { corner: .2 }); c.fillStyle = '#9fc4f0'; c.fillRect(-20, -44, 40, 80); });
+    darkCorridor(c, .45);
+  };
+  if (t < 114) { scene(470, 1150, lerp(1.1, 1.3, pr(t, 110.5, 114))); return; }
+  if (t < 117) { phoneScreen(c, t, t > 115.3); return; }
+  if (t < 121) { scene(430, 1060, lerp(2.0, 2.15, pr(t, 117, 121))); return; }
+  scene(560, 1080, lerp(2.2, 3.2, pr(t, 121, 126.5, easeInOutSine)));
+  resetT(c); const g = c.createRadialGradient(CX, 960, 300, CX, 960, 1100); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, alpha('#000', .8 * pr(t, 121, 125)));
   c.fillStyle = g; c.fillRect(0, 0, W, H);
-  const r = rng(31); for (let j = 0; j < 14; j++) { const x = r() * W, y0 = r() * H, sp = 1400 + r() * 1600, y = ((y0 + p * sp) % (H + 600)) - 300;
-    c.save(); c.globalAlpha = 1 - clamp(p * 1.3, 0, 1); shp(c, warp(ellPts(x, y, 160 + r() * 140, 60 + r() * 40), j, 14, true, 30), '#fbfcff', 3, 1400 + j, { pressure: .2, color: alpha(INK, .3) }); c.restore(); }
-  if (p > .45) { c.save(); c.globalAlpha = pr(p, .45, 1); spaceBg(c, t, { earthY: lerp(3400, 2800, pr(p, .45, 1)) }); c.restore(); }
-  if (u > 6.5) { const a = pr(u, 6.5, 7, easeOutBack); resetT(c); c.save(); c.translate(CX, 300); c.scale(a, a); label(c, 'ФАНТАСТИКА: А ЧТО ЕСЛИ…', 0, 0, { size: 48, bg: RED, color: '#fff', rot: -.04 }); c.restore();
-    asteroid(c, lerp(1300, 640, pr(u, 7, 10, easeOutQuint)), lerp(-300, 760, pr(u, 7, 10, easeOutQuint)), .8, u * .05); }
+  const a = pr(t, 123.6, 124.2, easeOutBack); if (a > 0) { c.save(); c.translate(CX, 380); c.scale(a, a); txt(c, 'ЧТО ТЫ\nБУДЕШЬ ДЕЛАТЬ?', 0, 0, 92, '#fff', { stroke: '#c0172b' }); c.restore(); }
+  fade(c, pr(t, 126, 126.5), '#000');
 }
-// 9. 125.5–160: гигант, правила, DART
+// 9. 126.5–134: продолжение следует
 function s9(c, t, u) {
-  if (u < 7) {   // астероид замечают заранее
-    spaceBg(c, t); asteroid(c, 640, 760, .8 + u * .01, (u + 3.5) * .05);
-    resetT(c);
-    const a = pr(u, 1.5, 2); c.save(); c.globalAlpha = a;
-    shp(c, rectPts(120, 1180, 840, 230), alpha('#0c0f2b', .8), 5, 1500, { color: '#9fd0ff', corner: .1 });
-    txt(c, 'ОБНАРУЖЕН АСТЕРОИД', CX, 1250, 50, '#9fd0ff'); txt(c, 'до сближения — 3 года', CX, 1340, 44, '#fff'); c.restore();
-    return;
-  }
-  if (u < 13.5) {   // паника и слухи ✗ / официальные сообщения ✓
-    paperBg(c, '#f1ece2'); const v = u - 7;
-    shp(c, rectPts(130, 300, 380, 700), '#2b2f3a', 7, 1510, { corner: .15 }); c.fillStyle = '#eef3f7'; c.fillRect(156, 340, 328, 620);
-    const msgs = ['ВСЕ БЕГИТЕ!!!', 'конец света завтра', 'скупайте всё!!', 'мне сказали…'];
-    msgs.forEach((m, k) => { const a = pr(v, .2 + k * .4, .5 + k * .4); if (a <= 0) return; c.save(); c.globalAlpha = a; shp(c, rectPts(176, 370 + k * 140, 288, 100), k % 2 ? '#dfe9d6' : '#fff', 3, 1520 + k, { corner: .3 }); txt(c, m, 320, 420 + k * 140, 28, INK); c.restore(); });
-    if (v > 2.2) cross(c, 320, 650, 160 * pr(v, 2.2, 2.5, easeOutBack));
-    txt(c, 'паника\nи слухи', 320, 1110, 48, RED);
-    c.save(); c.globalAlpha = pr(v, 2.6, 3.2); c.save(); c.translate(780, 620); c.scale(1.6, 1.6); c.translate(-780, -620); ICON.radio(c, 780, 620); c.restore();
-    check(c, 780, 820, 70); txt(c, 'официальные\nсообщения МЧС', 780, 1110, 44, GREEN); c.restore();
-    return;
-  }
-  if (u < 21.5) {   // тревожный чемоданчик
-    paperBg(c, '#eef1e6'); const v = u - 13.5;
-    txt(c, 'ТРЕВОЖНЫЙ ЧЕМОДАНЧИК', CX, 230, 56);
-    shp(c, [[380, 700], [700, 700], [730, 1150], [350, 1150]], '#6d7f4a', 7, 1530, { corner: .3, shade: sideShade('#53633a', 720, 920, 50, 240) });
-    shp(c, [[460, 700], [476, 620], [604, 620], [620, 700]], '#6d7f4a', 6, 1531, { corner: .4 });
-    shp(c, rectPts(430, 860, 220, 130), '#5c6c3e', 5, 1532, { corner: .2 });
-    const items = [['вода', ICON.water, 'вода'], ['документы', ICON.docs, 'документы'], ['аптечка', ICON.aid, 'аптечка'], ['фонарик', ICON.torch, 'фонарик'], ['радио', ICON.radio, 'радио']];
-    items.forEach(([w, ic, name], k) => {
-      const ta = wordAt('n16', w), a = pr(t, ta - .1, ta + .35, easeOutBack); if (a <= 0) return;
-      const ang = -Math.PI * .9 + k * Math.PI * .45, R = 400, x = CX + Math.cos(ang) * R * .95, y = 1000 + Math.sin(ang) * R * .8 - 120;
-      const xx = [175, 175, CX, 905, 905][k], yy = [560, 1000, 1330, 560, 1000][k];
-      c.save(); c.globalAlpha = clamp(a, 0, 1); c.translate(xx, yy); c.scale(clamp(a, .3, 1.2), clamp(a, .3, 1.2)); c.translate(-xx, -yy); shp(c, ellPts(xx, yy, 100, 100), '#fffaf0', 5, 1540 + k); ic(c, xx, yy); txt(c, name, xx, yy + 140, 38); c.restore();
-    });
-    return;
-  }
-  if (u < 25.5) {   // эвакуация
-    const v = u - 21.5; BALL = 0;
-    resetT(c); cityOutside(c, 0, [-200, -300, 1480, 1700], false);
-    c.fillStyle = '#e9eef3'; c.fillRect(0, 1380, W, H - 1380); inkLine(c, [[0, 1380], [W, 1380]], 5, 1550);
-    const bx = lerp(-60, 120, pr(v, 0, 4, easeInOutSine));
-    shp(c, rectPts(bx, 1060, 760, 300), '#f2c13d', 7, 1551, { corner: .12, shade: sideShade('#c99a22', bx + 740, 1220, 60, 160) });
-    for (let j = 0; j < 5; j++) shp(c, rectPts(bx + 40 + j * 140, 1100, 110, 110), '#bfe0f2', 4, 1552 + j, { corner: .1 });
-    for (const wx of [150, 600]) { shp(c, ellPts(bx + wx, 1370, 60, 60), '#2b2f3a', 6, 1560 + wx); shp(c, ellPts(bx + wx, 1370, 24, 24), '#aaa', 3, 1561 + wx); }
-    txt(c, 'ЭВАКУАЦИЯ', bx + 380, 1300, 40, INK);
-    for (let j = 0; j < 6; j++) { const px = 1000 - ((v * 60 + j * 120) % 700), bob = Math.abs(Math.sin(v * 7 + j)) * 8;   // люди с рюкзаками идут к автобусу
-      at(c, px, 1520 - bob, .32, () => { taper(c, [[0, -330], [0, -60]], [70, 60], ['#3d6fa8', '#8e2f45', '#5a5a78', '#4f9a6e'][j % 4], 1570 + j); shp(c, ellPts(0, -400, 44, 54), C.skin, 5, 1580 + j); shp(c, rectPts(20, -320, 60, 120), '#6d7f4a', 4, 1590 + j, { corner: .3 }); }); }
-    resetT(c); label(c, 'по указанию МЧС', CX, 260, { size: 44 });
-    return;
-  }
-  // DART: аппарат врезается, орбита уходит мимо Земли
-  const v = u - 25.5, hit = 4.3;
-  spaceBg(c, t);
-  const ax = 640 + (v > hit ? (v - hit) * 30 : 0), ay = 700 - (v > hit ? (v - hit) * 10 : 0);
-  c.save(); c.setLineDash([20, 18]); c.lineWidth = 6;
-  c.strokeStyle = alpha(RED, v > hit ? .3 : .9); c.beginPath(); c.moveTo(ax, ay); c.quadraticCurveTo(560, 1200, 520, 1550); c.stroke();
-  if (v > hit) { c.strokeStyle = alpha(GREEN, pr(v, hit + .6, hit + 1.6)); c.beginPath(); c.moveTo(ax, ay); c.quadraticCurveTo(900, 1100, 1250, 1300); c.stroke(); }
+  resetT(c); c.fillStyle = '#140d14'; c.fillRect(0, 0, W, H);
+  txt(c, 'СИГНАЛ ТРЕВОГИ', CX, 230, 52, '#ff5a4a');
+  const typed = 'ПРОДОЛЖЕНИЕ СЛЕДУЕТ…'.slice(0, Math.floor(pr(u, .3, 1.6, x => x) * 20));
+  txt(c, typed, CX, 520, 62, '#fff');
+  const a = pr(u, 1.4, 1.9, easeOutBack); c.save(); c.globalAlpha = clamp(a, 0, 1);
+  shp(c, ellPts(CX, 860, 130, 130), '#2a2430', 5, 1900, { color: '#e8c35a' });
+  c.save(); c.translate(CX, 860); c.scale(1.1, 1.1); c.translate(-CX, -860);
+  shp(c, rectPts(CX - 45, 790, 90, 150), '#111318', 5, 1901, { corner: .2, color: '#e8c35a' }); cross(c, CX, 865, 50); c.restore();
+  txt(c, 'СЕРИЯ 2', CX, 1100, 50, '#e8c35a'); txt(c, '«Нет связи»', CX, 1190, 76, '#fff');
   c.restore();
-  asteroid(c, ax, ay, .7, t * .05);
-  if (v < hit) at(c, lerp(80, ax - 160, pr(v, 0, hit, x => x)), lerp(1300, ay + 150, pr(v, 0, hit, x => x)), .8, () => {
-    c.rotate(-.9); shp(c, rectPts(-30, -60, 60, 120), '#e6e9ef', 5, 820, { corner: .2 });
-    shp(c, rectPts(-120, -20, 86, 40), '#3a5bd8', 4, 821, { corner: .1 }); shp(c, rectPts(34, -20, 86, 40), '#3a5bd8', 4, 822, { corner: .1 });
-    glow(c, 0, 90, 90, '#ff9b2e', 1); shp(c, [[-16, 62], [16, 62], [0, 140]], '#ffcf33', 3, 823); });
-  if (v > hit && v < hit + 1.2) { resetT(c); glow(c, ax - 120, ay + 110, 400 * (1 - (v - hit) / 1.2), '#ffffff', 1); }
-  resetT(c);
-  if (v > hit + 1.2) { const a = pr(v, hit + 1.2, hit + 1.6, easeOutBack); c.save(); c.translate(900, 1180); c.scale(a, a); txt(c, 'МИМО!', 0, 0, 90, GREEN, { stroke: '#fff' }); c.restore(); }
-  label(c, 'по-настоящему: NASA, миссия DART, 2022', CX, 230, { size: 34 });
-}
-// 10. 160–180: финал
-function s10(c, t, u) {
-  if (u < 9) {
-    BALL = 0; camera(c, 560, 1000, 1.05);
-    kitchen(c, 0);
-    const g = 163.4, glint = pr(t, g, g + .6, x => x);
-    if (t > g && t < g + .6) { resetT(c); c.save(); c.beginPath(); c.rect(WIN[0], WIN[1], WIN[2], WIN[3]); c.clip(); glow(c, lerp(WIN[0] - 100, WIN[0] + WIN[2] + 100, glint), 800, 260, '#fff6c8', 1); c.restore(); camera(c, 560, 1000, 1.05); }
-    at(c, 380, 1040, .5, () => bublik(c, t > 167 && t < 168.3 ? 'hiss' : 'sill'));
-    const jump = pr(t, g + .15, g + .45, easeOutBack), tx = lerp(560, 400, jump), hop = Math.sin(pr(t, g + .15, g + .5) * Math.PI) * -50;
-    const talkT = speaking('T', t);
-    at(c, tx, 1560 + hop, .95, () => temaStand(c, { eyes: t > g + .1 && t < 166 ? 'wide' : (blink(t) ? 'shut' : 'open'), look: [.6, 0], brows: t > g + .1 && t < 165.4 ? 'up' : 'calm',
-      mouth: talkT ? flap(t, 'shout', 'neutral') : (t > 167 ? 'smile' : (t > g + .1 ? 'O' : 'neutral')), armsUp: pr(t, g + .1, g + .3) * (1 - pr(t, 165, 165.6)) }));
-    const laugh = t > 166.9;
-    at(c, 860, 1800, 1.05, () => veraShout(c, { eyes: laugh ? 'squint' : (blink(t, 2) ? 'shut' : 'open'), look: [-1, 0], brows: laugh ? 'up' : 'calm', mouth: laugh ? flap(t, 'shout', 'smile') : 'smile' }, 0));
-    return;
-  }
-  const v = u - 9;   // итоговая карточка
-  paperBg(c, '#f4ecdc');
-  txt(c, 'ПРАВИЛО\nЧЕЛЯБИНСКА', CX, 250, 80, RED);
-  const steps = [[ICON.flash, 'Вспышка в небе'], [ICON.window, 'Прочь от окон'], [ICON.cover, 'Закрой голову'], [ICON.phone112, 'Раненые — звони 112']];
-  const T0 = [wordAt('n19', 'вспышка'), wordAt('n19', 'прочь'), wordAt('n19', 'закрой'), wordAt('n19', 'звони')];
-  steps.forEach(([ic, s], k) => { const a = pr(t, T0[k] - .1, T0[k] + .35, easeOutBack); if (a <= 0) return; const y = 560 + k * 260;
-    c.save(); c.globalAlpha = clamp(a, 0, 1); shp(c, ellPts(250, y, 100, 100), '#fffaf0', 5, 1600 + k); ic(c, 250, y); txt(c, s, 390, y, 52, INK, { align: 'left' }); c.restore();
-    if (k < 3) txt(c, '↓', 250, y + 132, 54, RED, { alpha: a }); });
-  const e = pr(v, 8.2, 9.2);
-  if (e > 0) { c.save(); c.globalAlpha = e; c.fillStyle = INK; c.fillRect(0, 1580, W, 340); txt(c, 'Экстренная служба: 112', CX, 1680, 56, '#fff'); txt(c, 'Серия 5 · «Вспышка в небе»', CX, 1790, 38, '#e8c35a'); c.restore(); }
-  fade(c, pr(t, 179.2, 180), '#000');
+  c.fillStyle = '#c0172b'; c.fillRect(0, 1760, W, 160); txt(c, 'Экстренная служба: 112', CX, 1840, 50, '#fff');
+  fade(c, 1 - pr(u, 0, .4), '#000'); fade(c, pr(t, 133.2, 134), '#000');
 }
 
-const SCENES = [[0, 8.5, s1], [8.5, 22, s2], [22, 40.3, s3], [40.3, 59.4, s4], [59.4, 76.5, s5], [76.5, 95.3, s6], [95.3, 115.5, s7], [115.5, 125.5, s8], [125.5, 160, s9], [160, 180, s10]];
-const NO_SUBS = new Set(['n01']);
+const SCENES = [[0, 8.6, s1], [8.6, 13, sTitle], [13, 24, s2], [24, 41, s3], [41, 59, s4], [59, 75.5, s5], [75.5, 92.3, s6], [92.3, 110.5, s7], [110.5, 126.5, s8], [126.5, 134, s9]];
+const NO_SUBS = new Set(['n01', 'n00']);
 function subtitlesAt(c, t) {
   const cue = SUBS.find(s => t >= s.start && t < s.end + .15 && !NO_SUBS.has(s.line)); if (!cue) return;
   resetT(c); const lines = cue.text.split('\n'), y = 1640 - (lines.length - 1) * 33;
