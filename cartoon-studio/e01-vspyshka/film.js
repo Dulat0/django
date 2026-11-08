@@ -1,8 +1,8 @@
 'use strict';
-// «Сигнал тревоги», серия 1 «Вспышка в небе». 134 с, 30 к/с, 1080×1920.
+// «Сигнал тревоги», серия 1 «Вспышка в небе». 162 с, 30 к/с, 1080×1920.
 // Каждая сцена — чистая функция времени: scene(c, t, u), t — время фильма, u — время от начала сцены.
 
-const FPS = 30, DUR = 134;
+const FPS = 30, DUR = 162;
 const pr = (t, a, b, e = easeIO) => e(clamp((t - a) / (b - a), 0, 1));
 const VOI = Object.fromEntries(VO.map(v => [v.id, v]));
 function speaking(who, t) { return VO.some(v => v.who === who && t >= v.at && t < v.at + v.dur); }
@@ -240,7 +240,7 @@ function s7(c, t, u) {
     { at: wordAt('n12', 'Если кто-то'), icon: ICON.phone112, text: 'Есть раненые —\nзвони 112' },
     { at: wordAt('n12', 'И слушай'), icon: ICON.radio, text: 'Слушай МЧС,\nа не слухи' }], { y0: 430, step: 215 });
 }
-// 8. 110.5–126.5: крючок — нет сети, родители далеко
+// 8+. финал-крючок
 function darkCorridor(c, d = .4) { resetT(c); c.save(); c.globalCompositeOperation = 'multiply'; c.fillStyle = mix('#ffffff', '#3a3f66', d); c.fillRect(0, 0, W, H); c.restore(); }
 function phoneScreen(c, t, noNet) {
   paperBg(c, '#1a1620');
@@ -252,47 +252,108 @@ function phoneScreen(c, t, noNet) {
   shp(c, ellPts(CX, 640, 120, 120), '#c99b8a', 5, 1801); txt(c, 'М', CX, 646, 110, '#fff');
   txt(c, 'Мама', CX, 860, 70, '#fff');
   if (!noNet) txt(c, 'Вызов' + '.'.repeat(1 + Math.floor(t * 3) % 3), CX, 950, 44, '#b9d0f0');
-  else { const a = pr(t, 115.3, 115.6, easeOutBack); c.save(); c.translate(CX, 960); c.scale(a, a); txt(c, 'НЕТ СЕТИ', 0, 0, 76, '#ff5a4a'); c.restore(); }
+  else { const a = pr(t, 114.8, 115.1, easeOutBack); c.save(); c.translate(CX, 960); c.scale(a, a); txt(c, 'НЕТ СЕТИ', 0, 0, 76, '#ff5a4a'); c.restore(); }
   shp(c, ellPts(CX, 1330, 70, 70), '#e0443a', 5, 1802); inkLine(c, [[CX - 34, 1336], [CX + 34, 1336]], 12, 1803, false, { color: '#fff' });
 }
-function s8(c, t, u) {
-  const tf = { eyes: blink(t, 2) ? 'shut' : 'open', look: [.3, 1], mouth: speaking('T', t) ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' };
-  const vf = { eyes: blink(t, 1) ? 'shut' : 'open', look: [1, .3], mouth: speaking('V', t) ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' };
-  const scene = (zx, zy, z) => {
-    camera(c, zx, zy, z); corridor(c, 0);
-    at(c, 300, 1560, 1.05, () => veraCrouch(c, vf, true));
-    at(c, 560, 1580, 1.0, () => temaCrouch(c, tf, true));
-    at(c, 430, 1700, .5, () => bublik(c, 'sill'));
-    at(c, 610, 1255, 1, () => { c.rotate(-.25); shp(c, rectPts(-26, -52, 52, 98), '#22252e', 4, 1810, { corner: .2 }); c.fillStyle = '#9fc4f0'; c.fillRect(-20, -44, 40, 80); });
-    darkCorridor(c, .45);
-  };
-  if (t < 114) { scene(470, 1150, lerp(1.1, 1.3, pr(t, 110.5, 114))); return; }
-  if (t < 117) { phoneScreen(c, t, t > 115.3); return; }
-  if (t < 121) { scene(430, 1060, lerp(2.0, 2.15, pr(t, 117, 121))); return; }
-  scene(560, 1080, lerp(2.2, 3.2, pr(t, 121, 126.5, easeInOutSine)));
-  resetT(c); const g = c.createRadialGradient(CX, 960, 300, CX, 960, 1100); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, alpha('#000', .8 * pr(t, 121, 125)));
-  c.fillStyle = g; c.fillRect(0, 0, W, H);
-  const a = pr(t, 123.6, 124.2, easeOutBack); if (a > 0) { c.save(); c.translate(CX, 380); c.scale(a, a); txt(c, 'ЧТО ТЫ\nБУДЕШЬ ДЕЛАТЬ?', 0, 0, 92, '#fff', { stroke: '#c0172b' }); c.restore(); }
-  fade(c, pr(t, 126, 126.5), '#000');
+function corridorPair(c, t, zx, zy, z, look = [1, .3], tLook = [.3, 1]) {
+  const tf = { eyes: blink(t, 2) ? 'shut' : 'open', look: tLook, mouth: speaking('T', t) ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' };
+  const vf = { eyes: blink(t, 1) ? 'shut' : 'open', look, mouth: speaking('V', t) ? flap(t, 'O', 'neutral') : 'tense', brows: 'worry' };
+  camera(c, zx, zy, z); corridor(c, 0);
+  at(c, 300, 1560, 1.05, () => veraCrouch(c, vf, true));
+  at(c, 560, 1580, 1.0, () => temaCrouch(c, tf, true));
+  at(c, 430, 1700, .5, () => bublik(c, 'sill'));
+  at(c, 610, 1255, 1, () => { c.rotate(-.25); shp(c, rectPts(-26, -52, 52, 98), '#22252e', 4, 1810, { corner: .2 }); c.fillStyle = '#9fc4f0'; c.fillRect(-20, -44, 40, 80); });
+  darkCorridor(c, .45);
 }
-// 9. 126.5–134: продолжение следует
+// 8. 110.5–124: нет сети, сирена
+function s8(c, t, u) {
+  if (t < 113) { corridorPair(c, t, 470, 1150, lerp(1.1, 1.3, pr(t, 110.5, 113))); return; }
+  if (t < 116.2) { phoneScreen(c, t, t > 114.8); return; }
+  if (t < 118.6) { corridorPair(c, t, 430, 1060, lerp(2.0, 2.1, pr(t, 116.2, 118.6))); return; }
+  const sir = .5 + .5 * Math.sin(t * 5);   // сирена: красные отсветы
+  corridorPair(c, t, 470, 1100, lerp(1.4, 1.6, pr(t, 118.6, 123)), [1, -.3], [1, -.3]);
+  resetT(c); c.save(); c.globalCompositeOperation = 'screen'; c.fillStyle = alpha('#ff2a2a', .22 * sir); c.fillRect(0, 0, W, H); c.restore();
+  fade(c, pr(t, 123.2, 124), '#fff');
+}
+// 9. 124–147: улица — больные соседи, спасатели, автобус
+const NEIGH = [
+  { x: 450, y: 1600, s: .62, o: { coat: '#5a4a3a', coatSh: '#433629', pants: '#33333c', hat: '#3a3a44', pose: 'cough', f: { eyes: 'squint', brows: 'worry', mouth: 'tense' } } },
+  { x: 880, y: 1520, s: .56, o: { coat: '#7a3d52', coatSh: '#5c2c3d', hat: '#d9d2c4', female: true, f: { eyes: 'open', look: [-1, 0], brows: 'worry', mouth: 'O' }, k: 1 } },
+  { x: 700, y: 1660, s: .66, o: { coat: '#40566b', coatSh: '#2f4152', hair: '#bdbdbd', f: { eyes: 'squint', brows: 'worry', mouth: 'tense' } } },
+];
 function s9(c, t, u) {
+  if (t < 128.4) {   // общий план двора
+    camera(c, 540, 1100, lerp(1.0, 1.12, pr(t, 124, 128.4)));
+    yard(c, t, { doorOpen: true });
+    for (const n of NEIGH) at(c, n.x, n.y, n.s, () => person(c, { ...n.o, k: n.o.k ? pr(t, 124, 126) : (n.o.pose === 'cough' ? 1 : 0) }));
+    at(c, 140, 1260, .42, () => temaStand(c, { eyes: 'wide', look: [1, 0], brows: 'up', mouth: 'O' }));
+    at(c, 250, 1250, .42, () => veraShout(c, { eyes: 'open', look: [1, 0], brows: 'worry', mouth: 'tense' }, 0));
+    fade(c, 1 - pr(t, 124, 124.6), '#fff'); return;
+  }
+  if (t < 131.5) {   // крупно: сосед кашляет кровью
+    const n = NEIGH[0]; camera(c, n.x + 20, n.y - 430 * n.s, 2.6, 3 + 6 * Math.max(0, Math.sin(t * 9)), t);
+    yard(c, t, { doorOpen: true }); at(c, n.x, n.y, n.s, () => person(c, { ...n.o, k: 1 }));
+    return;
+  }
+  if (t < 137) {   // спасатель с дозиметром, подъезжает автобус
+    camera(c, 540, 1060, 1.15); yard(c, t, { doorOpen: true });
+    bus(c, lerp(1300, 560, pr(t, 131.5, 135.5, easeOutQuint)), 1500, .62);
+    for (const n of NEIGH.slice(1)) at(c, n.x - 120, n.y, n.s, () => person(c, { ...n.o, k: 1 }));
+    at(c, 330, 1760, 1.0, () => rescuer(c, { dose: pr(t, 131.5, 136.5, x => x) }));
+    return;
+  }
+  if (t < 139.4) {   // Вере плохо
+    camera(c, 540, 1020, 2.2); yard(c, t, { doorOpen: true });
+    at(c, 540, 1820, 1.2, () => veraShout(c, { eyes: blink(t, .4) ? 'shut' : 'squint', look: [0, .3], brows: 'worry', mouth: speaking('V', t) ? flap(t, 'O', 'neutral') : 'tense', k: pr(t, 137.4, 138.8) }, 0));
+    return;
+  }
+  if (t < 141) {   // Тёма: «Вера?!»
+    camera(c, 540, 1050, 2.4, shakeAt(t, 139.5, 8, 4), t); yard(c, t, { doorOpen: true });
+    at(c, 540, 1760, 1.05, () => temaStand(c, { eyes: 'wide', look: [-1, 0], brows: 'up', mouth: speaking('T', t) ? 'shout' : 'O', armsUp: .3 }));
+    return;
+  }
+  if (t < 144.2) {   // спасатель уводит Веру к автобусу
+    camera(c, 560, 1180, 1.05); yard(c, t, { doorOpen: true });
+    bus(c, 560, 1500, .62);
+    const vx = lerp(560, 900, pr(t, 141.6, 144.2, easeInOutSine));
+    at(c, vx, 1720, .78, () => veraShout(c, { eyes: 'squint', look: [-1, 0], brows: 'worry', mouth: 'tense', k: 1 }, 0));
+    at(c, 260, 1800, .85, () => temaStand(c, { eyes: 'wide', look: [1, 0], brows: 'worry', mouth: 'O', armsUp: .4 }));
+    at(c, 540, 1800, .9, () => rescuer(c, { point: true }));
+    return;
+  }
+  // автобус уезжает, Вера у окна
+  const bx = lerp(80, 1300, pr(t, 145, 147, easeIn));
+  camera(c, 540, 1100, 1.1, 4, t); yard(c, t, { doorOpen: true });
+  bus(c, bx, 1560, .9, (q, i, x, y) => { if (i === 2) { veraHead(q, x, y + 20, { eyes: 'open', look: [-1, 0], brows: 'worry', mouth: 'O', k: 1 }, .9); hand(q, x - 40, y + 40, 18, 0, 2300); } else if (i % 2) shp(q, ellPts(x, y + 40, 40, 50), '#d9a888', 3, 2301 + i); });
+  at(c, 240, 1880, .9, () => temaStand(c, { eyes: 'wide', look: [1, 0], brows: 'worry', mouth: speaking('T', t) ? 'shout' : 'O', armsUp: .7 }));
+}
+// 10. 147–156: Тёма один
+function s10(c, t, u) {
+  const z = lerp(2.0, 1.0, pr(t, 147, 153.4, easeInOutSine));
+  camera(c, 540, lerp(1150, 1050, pr(t, 147, 153.4)), z); yard(c, t, { doorOpen: true });
+  at(c, 540, 1600, .9, () => { temaStand(c, { eyes: blink(t) ? 'shut' : 'open', look: [.6, 0], brows: 'worry', mouth: 'tense' }); at(c, 0, -470, .45, () => bublik(c, 'flat')); });
+  resetT(c); const g = c.createRadialGradient(CX, 960, 260, CX, 960, 1100); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, alpha('#000', .85 * pr(t, 150, 155)));
+  c.fillStyle = g; c.fillRect(0, 0, W, H);
+  const a = pr(t, 153.4, 154, easeOutBack); if (a > 0) { c.save(); c.translate(CX, 360); c.scale(a, a); txt(c, 'ЧТО ТЫ\nБУДЕШЬ ДЕЛАТЬ?', 0, 0, 92, '#fff', { stroke: '#c0172b' }); c.restore(); }
+  fade(c, pr(t, 155.6, 156), '#000');
+}
+// 11. 156–162: продолжение следует
+function s11(c, t, u) {
   resetT(c); c.fillStyle = '#140d14'; c.fillRect(0, 0, W, H);
   txt(c, 'СИГНАЛ ТРЕВОГИ', CX, 230, 52, '#ff5a4a');
-  const typed = 'ПРОДОЛЖЕНИЕ СЛЕДУЕТ…'.slice(0, Math.floor(pr(u, .3, 1.6, x => x) * 20));
-  txt(c, typed, CX, 520, 62, '#fff');
-  const a = pr(u, 1.4, 1.9, easeOutBack); c.save(); c.globalAlpha = clamp(a, 0, 1);
-  shp(c, ellPts(CX, 860, 130, 130), '#2a2430', 5, 1900, { color: '#e8c35a' });
-  c.save(); c.translate(CX, 860); c.scale(1.1, 1.1); c.translate(-CX, -860);
-  shp(c, rectPts(CX - 45, 790, 90, 150), '#111318', 5, 1901, { corner: .2, color: '#e8c35a' }); cross(c, CX, 865, 50); c.restore();
-  txt(c, 'СЕРИЯ 2', CX, 1100, 50, '#e8c35a'); txt(c, '«Нет связи»', CX, 1190, 76, '#fff');
+  txt(c, 'ПРОДОЛЖЕНИЕ СЛЕДУЕТ…'.slice(0, Math.floor(pr(u, .2, 1.4, x => x) * 20)), CX, 470, 62, '#fff');
+  const a = pr(u, 1.2, 1.7, easeOutBack); c.save(); c.globalAlpha = clamp(a, 0, 1);
+  txt(c, 'СЕРИЯ 2', CX, 700, 50, '#e8c35a'); txt(c, '«Не беги»', CX, 800, 96, '#fff');
   c.restore();
-  c.fillStyle = '#c0172b'; c.fillRect(0, 1760, W, 160); txt(c, 'Экстренная служба: 112', CX, 1840, 50, '#fff');
-  fade(c, 1 - pr(u, 0, .4), '#000'); fade(c, pr(t, 133.2, 134), '#000');
+  const b = pr(u, 2.4, 2.9, easeOutBack); if (b > 0) { c.save(); c.translate(CX, 1180); c.scale(b, b);
+    shp(c, rectPts(-380, -110, 760, 220), '#c0172b', 6, 2400, { corner: .25, color: '#fff' }); txt(c, 'ПОДПИШИСЬ,', 0, -34, 64, '#fff'); txt(c, 'чтобы узнать, что было дальше', 0, 44, 38, '#ffe1d9');
+    c.restore(); }
+  c.fillStyle = '#2a2430'; c.fillRect(0, 1780, W, 140); txt(c, 'Экстренная служба: 112', CX, 1850, 46, '#fff');
+  fade(c, 1 - pr(u, 0, .4), '#000'); fade(c, pr(t, 161.3, 162), '#000');
 }
 
-const SCENES = [[0, 8.6, s1], [8.6, 13, sTitle], [13, 24, s2], [24, 41, s3], [41, 59, s4], [59, 75.5, s5], [75.5, 92.3, s6], [92.3, 110.5, s7], [110.5, 126.5, s8], [126.5, 134, s9]];
-const NO_SUBS = new Set(['n01', 'n00']);
+const SCENES = [[0, 8.6, s1], [8.6, 13, sTitle], [13, 24, s2], [24, 41, s3], [41, 59, s4], [59, 75.5, s5], [75.5, 92.3, s6], [92.3, 110.5, s7], [110.5, 124, s8], [124, 147, s9], [147, 156, s10], [156, 162, s11]];
+const NO_SUBS = new Set(['n01', 'n00', 'n15']);
 function subtitlesAt(c, t) {
   const cue = SUBS.find(s => t >= s.start && t < s.end + .15 && !NO_SUBS.has(s.line)); if (!cue) return;
   resetT(c); const lines = cue.text.split('\n'), y = 1640 - (lines.length - 1) * 33;
@@ -303,5 +364,6 @@ function subtitlesAt(c, t) {
 function drawFilm(c, t) {
   const sc = SCENES.find(s => t >= s[0] && t < s[1]) || SCENES[SCENES.length - 1];
   resetT(c); c.clearRect(0, 0, W, H); sc[2](c, t, t - sc[0]);
+  if (t > 118.6 && t < 156) { resetT(c); label(c, 'ДАЛЬШЕ — ВЫМЫСЕЛ', 220, 110, { size: 28, bg: '#fff3c4', rot: -.03 }); }
   subtitlesAt(c, t);
 }

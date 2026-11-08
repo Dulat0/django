@@ -268,3 +268,43 @@ function space(c, k) {
   });
   c.save(); c.setLineDash([16, 18]); inkLine(c, [[270, 1130], [400, 1000], [470, 920]], 4, 830, false, { color: alpha('#ffffff', .7), pressure: 0 }); c.restore();
 }
+
+// ---------- двор у подъезда (финал серии 1) ----------
+function yard(c, t, o = {}) {
+  const g = c.createLinearGradient(0, 0, 0, 1200); g.addColorStop(0, '#8d8f8a'); g.addColorStop(1, '#d9c9a2'); c.fillStyle = g; c.fillRect(-400, -400, W + 800, 1700);
+  // столб дыма на горизонте
+  for (let j = 0; j < 9; j++) { const y = 900 - j * 110 - (t * 18 % 110), r = 70 + j * 26, x = 820 + j * 18 + Math.sin(t * .6 + j) * 14;
+    shp(c, warp(ellPts(x, y, r * 1.2, r), 2100 + j, r * .1, true, 30), mix('#3b3436', '#77706c', j / 9), 3, 2100 + j, { pressure: .2, color: alpha(INK, .4) }); }
+  glow(c, 820, 980, 260, '#ff7a2a', .8);
+  // дома с выбитыми окнами
+  const r = rng(77);
+  for (const [bx, bw, bh] of [[-200, 420, 760], [260, 380, 620], [700, 520, 700]]) {
+    const top = 1180 - bh;
+    shp(c, rectPts(bx, top, bw, bh + 40), '#b7bcc8', 4, 2120 + bx, { corner: .05, shade: q => { q.fillStyle = '#979eaf'; q.fillRect(bx + bw * .75, top, bw, bh + 40); } });
+    shp(c, rectPts(bx - 6, top - 4, bw + 12, 16), '#f6f8fb', 3, 2121 + bx, { corner: .3 });
+    for (let yy = top + 30; yy < 1140; yy += 52) for (let xx = bx + 20; xx < bx + bw - 30; xx += 44) {
+      const broken = r() < .35; c.fillStyle = broken ? '#2c2f38' : '#6f7a96'; c.fillRect(xx, yy, 24, 30);
+      if (broken) { c.fillStyle = '#cfe6f3'; c.beginPath(); c.moveTo(xx, yy); c.lineTo(xx + 10, yy + 14); c.lineTo(xx, yy + 22); c.fill(); }
+    }
+  }
+  // подъезд слева
+  shp(c, rectPts(40, 860, 240, 340), '#9a8f84', 4, 2130, { corner: .05 });
+  shp(c, rectPts(90, 940, 140, 260), o.doorOpen ? '#2b2420' : '#6a4a34', 4, 2131, { corner: .05 });
+  shp(c, [[20, 860], [300, 860], [320, 900], [0, 900]], '#7d7470', 4, 2132, { corner: .1 });
+  // снег, следы, деревья
+  c.fillStyle = '#eef2f6'; c.fillRect(-400, 1180, W + 800, 1200); inkLine(c, [[-400, 1180], [W + 400, 1182]], 4, 2140);
+  for (let j = 0; j < 30; j++) { c.fillStyle = alpha('#9fb0c4', .5); c.beginPath(); c.ellipse(r() * W, 1250 + r() * 600, 14, 6, 0, 0, TAU); c.fill(); }
+  for (const x of [380, 640]) { inkLine(c, [[x, 1190], [x + 6, 980]], 8, 2150 + x, false, { color: '#4a3e38' }); for (let b = 0; b < 5; b++) inkLine(c, [[x + 3, 1150 - b * 34], [x + (b % 2 ? 60 : -56), 1110 - b * 40]], 4, 2160 + x + b, false, { color: '#4a3e38' }); }
+  // снег/пепел в воздухе
+  c.fillStyle = '#fff'; const s = rng(5); for (let j = 0; j < 90; j++) { c.globalAlpha = .6; c.fillRect((s() * W + t * 20) % W, (s() * H + t * 60 * (.5 + s())) % H, 4, 4); } c.globalAlpha = 1;
+}
+// автобус эвакуации, вид сбоку; faces(c, i, x, y) рисует пассажира в i-м окне
+function bus(c, x, y, s, faces) {
+  c.save(); c.translate(x, y); c.scale(s, s);
+  shp(c, rectPts(0, -360, 900, 320), '#f2c13d', 7, 2200, { corner: .1, shade: q => { sideShade('#c99a22', 880, -200, 60, 180)(q); q.fillStyle = '#c0172b'; q.fillRect(0, -150, 900, 26); } });
+  for (let j = 0; j < 5; j++) { const wx = 40 + j * 160; shp(c, rectPts(wx, -330, 130, 130), '#bfe0f2', 4, 2201 + j, { corner: .1 }); if (faces) { c.save(); c.beginPath(); c.rect(wx, -330, 130, 130); c.clip(); faces(c, j, wx + 65, -250); c.restore(); } }
+  shp(c, rectPts(820, -330, 70, 250), '#9fc6dc', 4, 2210, { corner: .1 });
+  for (const wx of [170, 720]) { shp(c, ellPts(wx, -40, 64, 64), '#2b2f3a', 6, 2211 + wx); shp(c, ellPts(wx, -40, 26, 26), '#aaa', 3, 2212 + wx); }
+  c.save(); c.font = '800 46px Rubik'; c.fillStyle = INK; c.textAlign = 'center'; c.fillText('ЭВАКУАЦИЯ', 420, -78); c.restore();
+  c.restore();
+}

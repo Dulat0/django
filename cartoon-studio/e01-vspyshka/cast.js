@@ -210,7 +210,7 @@ function temaCrouch(c, f, knees = false) {
 
 // ---------- Вера (22 года): рост ~820 ----------
 function veraHead(c, x, y, f, s = 1) {
-  at(c, x, y, s, () => { const rx = 44, ry = 57; veraHairBack(c, rx, ry, 300); face(c, rx, ry, { ...f, female: true }, 310); veraHairFront(c, rx, ry, 330); });
+  at(c, x, y, s, () => { const rx = 44, ry = 57; veraHairBack(c, rx, ry, 300); face(c, rx, ry, { ...f, female: true }, 310); if (f.k) noseBleed(c, rx, ry, f.k); veraHairFront(c, rx, ry, 330); });
 }
 function veraNeck(c, x, y) { shp(c, [[x - 13, y], [x + 13, y], [x + 15, y + 44], [x - 15, y + 44]], C.skin, 4, 340, { shade: sideShade(C.skinSh, x + 14, y + 22, 10, 40) }); }
 function veraTorso(c, y0) {   // свитер с высоким горлом, приталенный
@@ -271,4 +271,67 @@ function label(c, text, x, y, o = {}) {
   c.translate(x, y); c.rotate(o.rot ?? -.02);
   shp(c, [[-w / 2, -h / 2], [w / 2, -h / 2], [w / 2, h / 2], [-w / 2, h / 2]], o.bg || '#fffaf0', 4, 170, { corner: .2, pressure: .3 });
   c.fillStyle = o.color || INK; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, 0, 3); c.restore();
+}
+
+// ---------- серия 1, финал: соседи, спасатель, недомогание ----------
+// кровь из носа поверх лица: рисовать после головы, в тех же координатах (rx, ry головы)
+function noseBleed(c, rx, ry, k = 1) {
+  c.save(); c.strokeStyle = '#b3121f'; c.lineCap = 'round'; c.lineWidth = rx * .07;
+  c.beginPath(); c.moveTo(-rx * .06, ry * .34); c.quadraticCurveTo(-rx * .1, ry * .44, -rx * .07, ry * (.34 + .2 * k)); c.stroke(); c.restore();
+}
+// обычный взрослый в зимнем: o = {coat, coatSh, pants, hat, hair, f, pose: 'stand'|'cough'|'hold', female, k: кровь 0..1}
+function person(c, o) {
+  const P = o.pose || 'stand';
+  c.save(); if (P === 'cough') c.rotate(.08);
+  for (const sx of [-1, 1]) {
+    taper(c, [[sx * 32, -300], [sx * 34, -160], [sx * 36, -30]], [58, 46, 36], o.pants || '#3a3a46', 1950 + sx);
+    shp(c, [[sx * 36 - 26, -36], [sx * 36 + 26, -36], [sx * 36 + 30, 0], [sx * 36 - 30, 0]], '#2a2224', 4, 1952 + sx, { corner: .4 });
+  }
+  shp(c, [[-30, -654], [30, -654], [34, -620], [-34, -620]], C.skin, 4, 1955);
+  shp(c, [[-84, -620], [84, -620], [96, -460], [100, -250], [-100, -250], [-96, -460]], o.coat, 5, 1956,
+    { shade: q => { sideShade(o.coatSh, 90, -440, 40, 200)(q); inkLine(q, [[0, -610], [0, -260]], 2, 1957, false, { color: alpha(INK, .5) }); } });
+  shp(c, [[-60, -640], [60, -640], [70, -598], [-70, -598]], o.coatSh, 4, 1958, { corner: .4 });   // воротник
+  const arm = (sx, A, cloth) => { taper(c, A, [38, 32, 28], o.coat, 1960 + sx, { shade: sideShade(o.coatSh, A[1][0] + 10, A[1][1], 10, 80) }); return A[2]; };
+  const L = arm(-1, [[-80, -600], [-108, -470], [-100, -350]]);
+  hand(c, L[0], L[1] + 12, 16, 0, 1963);
+  let R;
+  if (P === 'cough') R = arm(1, [[80, -600], [96, -520], [24, -660]]);
+  else R = arm(1, [[80, -600], [108, -470], [100, -350]]);
+  at(c, 0, -712, 1, () => {
+    const rx = 46, ry = 58; face(c, rx, ry, { ...o.f, female: o.female }, 1970);
+    if (o.k) noseBleed(c, rx, ry, o.k);
+    if (o.hair) shp(c, [[-rx * 1.02, ry * .05], [-rx, -ry * .6], [-rx * .4, -ry * 1.02], [rx * .5, -ry * 1.02], [rx, -ry * .6], [rx * 1.02, ry * .05], [rx * .8, -ry * .45], [-rx * .8, -ry * .45]], o.hair, 4, 1990, { corner: .6 });
+    if (o.hat) { shp(c, [[-rx * 1.12, -ry * .25], [-rx * 1.05, -ry * .9], [0, -ry * 1.22], [rx * 1.05, -ry * .9], [rx * 1.12, -ry * .25]], o.hat, 5, 1991, { shade: q => hatchIn(q, rectPath(-rx * 1.2, -ry * 1.3, rx * 2.4, ry * 1.1), [-rx * 1.2, -ry * 1.3, rx * 2.4, ry * 1.1], { angle: 1.57, alpha: .25, gap: 9 }) });
+      shp(c, [[-rx * 1.18, -ry * .32], [rx * 1.18, -ry * .32], [rx * 1.14, -ry * .1], [-rx * 1.14, -ry * .1]], mix(o.hat, '#ffffff', .25), 4, 1992, { corner: .3 }); }
+  });
+  if (P === 'cough') {   // платок у рта
+    c.save(); c.translate(R[0] - 6, R[1] + 6);
+    shp(c, [[-34, -26], [34, -30], [38, 24], [-30, 28]], '#f6f3ee', 3.5, 1993, { corner: .5 });
+    if (o.k) { c.fillStyle = '#b3121f'; c.beginPath(); c.ellipse(4, 0, 12 * o.k, 8 * o.k, .4, 0, TAU); c.fill(); }
+    c.restore(); hand(c, R[0], R[1] + 18, 16, .3, 1994);
+  } else hand(c, R[0], R[1] + 12, 16, 0, 1994);
+  c.restore();
+}
+// спасатель в защитном костюме и противогазе; dose 0..1 — дозиметр в руке
+function rescuer(c, o = {}) {
+  const suit = '#e9e4cf', suitSh = '#c5bd9c';
+  for (const sx of [-1, 1]) {
+    taper(c, [[sx * 36, -320], [sx * 38, -170], [sx * 40, -30]], [70, 58, 50], suit, 2001 + sx, { shade: sideShade(suitSh, sx * 60, -170, 16, 160) });
+    shp(c, [[sx * 40 - 32, -50], [sx * 40 + 32, -50], [sx * 40 + 36, 0], [sx * 40 - 36, 0]], '#2a2a2a', 4, 2003 + sx, { corner: .3 });
+  }
+  shp(c, [[-96, -620], [96, -620], [104, -450], [96, -300], [-96, -300], [-104, -450]], suit, 5, 2005, { shade: q => { sideShade(suitSh, 96, -450, 40, 180)(q); inkLine(q, [[-60, -520], [60, -515]], 2, 2006, false, { color: alpha(INK, .35) }); } });
+  shp(c, [[-64, -560], [64, -560], [62, -520], [-62, -520]], '#e8862a', 3, 2007, { corner: .2 });   // светоотражающая полоса
+  const pointA = o.point ? [[90, -600], [170, -600], [250, -620]] : [[90, -600], [120, -480], [70, -400]];
+  taper(c, [[-90, -600], [-120, -480], [-80, -400]], [44, 38, 34], suit, 2008); shp(c, ellPts(-80, -392, 22, 22), '#2a2a2a', 4, 2009);
+  taper(c, pointA, [44, 38, 34], suit, 2010); shp(c, ellPts(pointA[2][0], pointA[2][1] + 8, 22, 22), '#2a2a2a', 4, 2011);
+  if (o.dose !== undefined) {   // дозиметр в левой руке
+    shp(c, rectPts(-130, -470, 90, 60), '#f2c13d', 4, 2012, { corner: .2 }); c.fillStyle = '#1f2a1f'; c.fillRect(-120, -462, 70, 26);
+    c.save(); c.font = '800 18px Rubik'; c.fillStyle = o.dose > .6 ? '#ff4a3a' : '#7dff8a'; c.textAlign = 'center'; c.fillText((o.dose * 9.9).toFixed(1), -85, -443); c.restore();
+  }
+  at(c, 0, -700, 1, () => {   // капюшон и противогаз
+    shp(c, ellPts(0, 0, 70, 82), suit, 5, 2013, { shade: sideShade(suitSh, 60, 10, 26, 70) });
+    shp(c, ellPts(0, 10, 52, 62), '#3b3d3a', 5, 2014);
+    for (const sx of [-1, 1]) { shp(c, ellPts(sx * 22, -6, 17, 17), '#b9d6e4', 4, 2015 + sx); c.fillStyle = alpha('#fff', .6); c.beginPath(); c.arc(sx * 22 - 6, -12, 5, 0, TAU); c.fill(); }
+    shp(c, ellPts(0, 52, 24, 20), '#55574f', 4, 2018); shp(c, rectPts(-14, 64, 28, 34), '#6b6d63', 4, 2019, { corner: .2 });
+  });
 }

@@ -7,7 +7,7 @@ from scipy.signal import butter, sosfilt
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EP = os.path.join(ROOT, 'e01-vspyshka'); SFX = os.path.join(ROOT, 'sfx')
-SR = 48000; DUR = 134.0; N = int(SR * DUR)
+SR = 48000; DUR = 162.0; N = int(SR * DUR)
 rng = np.random.default_rng(3)
 
 def load(p):
@@ -70,10 +70,17 @@ pad(['D2', 'A2'], 75.5, 10.0, .09, 3, 400)                                    # 
 for k in range(8): kick(79 + k * .8, .22 + k * .02); kick(79.22 + k * .8, .14 + k * .015)
 sad = [['A2', 'C3', 'E3'], ['F2', 'A2', 'C3'], ['C3', 'E3', 'G3'], ['G2', 'B2', 'D3']]
 for k in range(5): pad(sad[k % 4], 93 + k * 3.6, 4.0, .07, 1.5, 1400)          # 7. после
-pad(['A1', 'E2'], 110.5, 15.8, .10, 3, 350); pad(['A#4'], 116, 10.3, .025, 4, 5000)   # 8. крючок: гул и тонкий звон
-for k in range(14): kick(112 + k * 1.0, .18 + k * .012); kick(112.25 + k * 1.0, .11 + k * .01)
-for k, n in enumerate(motif): pluck(n, 127.2 + k * .45, .13)                   # 9. продолжение следует
-pad(['A2', 'C3', 'E3'], 127.0, 7.0, .07, 1, 1400)
+pad(['A1', 'E2'], 110.5, 13.5, .10, 3, 350)                                    # 8. нет сети: гул и сердце
+for k in range(6): kick(112 + k * 1.0, .18 + k * .012); kick(112.25 + k * 1.0, .11 + k * .01)
+pad(['A2', 'D#3'], 118.6, 5.4, .07, 3, 900)                                    # тревожный тритон
+pad(['D2', 'A2'], 124, 23, .10, 2, 500); pad(['A#4'], 124, 23, .02, 4, 5000)  # 9. улица: тёмный гул и тонкий звон
+for k in range(23): kick(124.5 + k * 1.0, .22)
+pad(['D3', 'F3', 'A3'], 137, 10, .08, 2, 1600); pad(['A#2', 'D3', 'F3', 'A3'], 144, 3.6, .11, .5, 2000)
+minor = ['A4', 'E4', 'F4', 'E4', 'D4', 'C4', 'B3', 'A3']
+pad(['A2', 'C3', 'E3'], 147, 8.6, .08, 2, 1200)                                # 10. один
+for k, n in enumerate(minor): pluck(n, 147.6 + k * .8, .13, 1.4)
+for k, n in enumerate(motif): pluck(n, 156.6 + k * .45, .13)                   # 11. продолжение следует
+pad(['A2', 'C3', 'E3'], 156.4, 5.6, .07, 1, 1400)
 # ---------- эффекты ----------
 S = {k[:-4]: load(os.path.join(SFX, k)) for k in os.listdir(SFX) if k.endswith('.wav') and k != 'demo-track.wav'}
 FX = np.zeros((N, 2)); cue = lambda k, at, g=1.: place(FX, S[k], at, g)
@@ -97,10 +104,31 @@ for w in ['Первое', 'Второе', 'Третье', 'Четвёртое']:
 cue('boom', 86.8); cue('glass-shatter', 86.85); cue('glass-shatter', 90.5, .55); cue('glass-settle', 92.3); cue('cat-hiss', 94.7, .6)
 for w in ['Надень', 'Не подходи', 'Проверь', 'Если кто-то', 'И слушай']: cue('clock-tick', word_at('n12', w), 1.5)
 cue('clock-tick', 111.3, 1.2)
-place(FX, tone([425], 1.0, .35, 1), 114.1)                                    # гудок вызова
-place(FX, tone([950, 1400, 1800], .33, .9, 1, .2), 115.3)                     # «абонент недоступен»
-cue('boom', 123.6, .35)
-for k in range(20): cue('clock-tick', 126.8 + k * .065, .5)
+place(FX, tone([425], 1.0, .2, 1), 113.6)                                     # гудок вызова
+place(FX, tone([950, 1400, 1800], .33, .9, 1, .2), 114.8)                     # «абонент недоступен»
+def siren_fx(d, g):
+    t = t_(d); f = 760 + 260 * np.sin(2 * np.pi * .35 * t); ph = np.cumsum(f) / SR
+    y = (2 * np.abs(2 * (ph % 1) - 1) - 1) * np.minimum(1, t / 1.5) * g; return np.stack([y, np.roll(y, 900)], 1)
+place(FX, lp(siren_fx(5.4, .25), 900), 118.6)                                 # сирена за стеной
+place(FX, siren_fx(23, .12), 124)                                             # сирена на улице
+def geiger(at, d, r0, r1, g=.5):
+    n = int(d * SR); y = np.zeros(n); tt = 0.
+    while tt < d:
+        rate = r0 + (r1 - r0) * tt / d; tt += rng.exponential(1 / rate); i = int(tt * SR)
+        if i < n - 60: y[i:i + 60] += rng.standard_normal(60) * np.exp(-np.arange(60) / 10)
+    y = sosfilt(butter(2, 2000, 'highpass', fs=SR, output='sos'), y) * g; place(FX, np.stack([y, y], 1), at)
+geiger(131.5, 5.5, 3, 40); geiger(147, 8.6, 6, 30, .35)
+def cough(at, g=.6):
+    for k in range(3):
+        d = .2; y = sosfilt(butter(2, [300, 2400], 'bandpass', fs=SR, output='sos'), rng.standard_normal(int(d * SR))) * np.exp(-t_(d) * 14) * np.minimum(1, t_(d) / .01)
+        place(FX, np.stack([y, y], 1) * g * (1 - k * .2), at + k * .28)
+for at in (124.8, 128.6, 129.9, 131.0, 133.4): cough(at, .7 if 128 < at < 131.5 else .35)
+murmur = lp(rng.standard_normal(int(23 * SR)), 700) * .05; place(FX, np.stack([murmur, np.roll(murmur, 4000)], 1), 124)
+cue('rumble', 131.5, .4); cue('rumble', 135.5, .3)
+hiss = sosfilt(butter(2, 3000, 'highpass', fs=SR, output='sos'), rng.standard_normal(int(.7 * SR))) * np.exp(-t_(.7) * 5) * .3; place(FX, np.stack([hiss, hiss], 1), 144.4)   # двери автобуса
+cue('rumble', 145, .7); cue('surprise-tuk', 139.5)
+cue('boom', 153.4, .35)
+for k in range(20): cue('clock-tick', 156.4 + k * .06, .5)
 # ---------- озвучка и приглушение музыки ----------
 V = np.zeros((N, 2)); duck = np.zeros(N)
 for v in VO:
@@ -110,7 +138,7 @@ k = int(.25 * SR); cs = np.concatenate([[0], np.cumsum(duck)]); idx = np.arange(
 duck = (cs[np.minimum(N, idx + k // 2)] - cs[np.maximum(0, idx - k // 2)]) / k   # скользящее среднее
 M *= (1 - .65 * duck)[:, None]
 M[int(85.5 * SR):int(86.8 * SR)] = 0                                          # тишина перед ударом
-M[int(126.3 * SR):int(127.0 * SR)] *= 0
+M[int(155.6 * SR):int(156.3 * SR)] *= 0
 MIX = M * .8 + FX * .55 + V * 1.0
 peak = np.max(np.abs(MIX)); MIX = MIX / peak * .95
 wavfile.write(os.path.join(EP, 'out', 'mix.wav'), SR, (MIX * 32767).astype(np.int16))
