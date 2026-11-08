@@ -1,50 +1,56 @@
 <!doctype html>
 <meta charset="utf-8">
-<title>Серия 5 · пробные кадры</title>
+<title>Серия 5 · пробные кадры v2</title>
 <style>
-@font-face{font-family:Rubik;font-weight:800;src:url(../fonts/rubik-cyrillic-800-normal.woff2)}
-@font-face{font-family:Neucha;src:url(../fonts/neucha-cyrillic-400-normal.woff2)}
+@font-face{font-family:Rubik;font-weight:800;src:url(../fonts/rubik-cyrillic-800-normal.woff2);unicode-range:U+0400-04FF,U+2116}
+@font-face{font-family:Rubik;font-weight:800;src:url(../fonts/rubik-latin-800-normal.woff2);unicode-range:U+0000-00FF,U+2000-206F}
 body{margin:0;background:#222;display:grid;place-items:center;min-height:100vh}canvas{max-width:100vw;max-height:100vh}
 </style>
 <canvas id="c"></canvas>
-<span style="font-family:Rubik;font-weight:800;position:absolute;opacity:0">.</span><span style="font-family:Neucha;position:absolute;opacity:0">.</span>
 <script src="core.js"></script>
 <script src="cast.js"></script>
 <script src="sets.js"></script>
 <script>
 'use strict';
-function frameKitchen(c) {
+function fKitchen(c) {
   kitchen(c, 0);
-  at(c, 540, 1190, 1, () => tema(c, 'sit', { eyes: 'open', look: [.7, .2], mouth: 'chew', brows: 'calm' }));
+  at(c, 380, 1040, .5, () => bublik(c, 'sill'));
+  at(c, 600, 1290, 1, () => temaSit(c, { eyes: 'open', look: [.6, .3], mouth: 'chew', brows: 'calm' }));
   table(c);
-  at(c, 290, 985, .72, () => bublik(c, 'sill'));
-  label(c, 'Челябинск · 15 февраля 2013 · 9:20', CX, 130, { size: 44 });
+  label(c, 'Челябинск · 15 февраля 2013 · 9:20', CX, 228, { size: 36 });
   subtitle(c, 'Обычное утро. Мороз, школа,\nбутерброд с сыром…');
 }
-function frameFlash(c) {
-  kitchen(c, 1);
-  roomLight(c, 1);
-  floorShadow(c, 520, 1500, 1);
-  at(c, 520, 1010, 1.02, () => tema(c, 'back'));
+function fFlash(c) {
+  kitchen(c, 1); roomLight(c, 1);
+  floorShadow(c, 560, 1500, 1);
+  at(c, 560, 1500, 1, () => temaBack(c));
   table(c, 1);
-  at(c, 860, 1800, .7, () => bublik(c, 'hiss'));
-  subtitle(c, '— Ого! Это надо снять!', 1600);
+  at(c, 860, 1820, .55, () => bublik(c, 'hiss'));
+  subtitle(c, '— Ого! Это надо снять!', 1620);
 }
-function frameCorridor(c) {
-  corridor(c, 1);
-  at(c, 290, 1220, 1.2, () => vera(c, 'crouch', { eyes: 'shut', mouth: 'tight', brows: 'worry' }));
-  at(c, 580, 1270, 1.1, () => tema(c, 'crouch'));
-  at(c, 470, 1560, .75, () => bublik(c, 'flat'));
-  shards(c, 1);
-  boomText(c, 'БАХ!', 820, 420);
-  subtitle(c, 'Окна лопаются — но у стены\nбез окон осколки не достанут', 1700);
+function fVera(c) {
+  kitchen(c, .6); roomLight(c, .6);
+  at(c, 470, 1500, .95, () => temaBack(c));
+  table(c, 1);
+  at(c, 830, 1840, 1.12, () => veraShout(c, { eyes: 'wide', look: [-1, 0], brows: 'urgent', mouth: 'shout' }));
+  subtitle(c, '— Тёма, от окна!', 1880);
 }
-function frameSpace(c) {
+function fBlast(c) { windowBlast(c, .3); label(c, 'замедленно', 900, 1580, { size: 30, rot: .03 }); subtitle(c, 'Ударная волна пришла\nчерез ~2 минуты после вспышки', 1700); }
+function fCorridor(c) {
+  const imp = corridor(c, .4);
+  at(c, 300, 1560, 1.05, () => veraCrouch(c, { eyes: 'shut', mouth: 'tense', brows: 'worry' }));
+  at(c, 560, 1580, 1.0, () => temaCrouch(c, { eyes: 'shut', mouth: 'tense', brows: 'worry' }));
+  at(c, 430, 1700, .5, () => bublik(c, 'flat'));
+  const sh = shardsOf([imp[0] - 120, imp[1] - 160, 240, 300], imp, 90);
+  drawShards(c, sh, imp, .45, { spread: 700, fall: 300 });
+  dust(c, 860, 900, 260, .5, 92);
+  subtitle(c, 'У стены без окон\nосколки не достанут', 1780);
+}
+function fSpace(c) {
   space(c, 1);
-  label(c, 'ФАНТАСТИКА: А ЧТО ЕСЛИ…', CX, 140, { size: 50, bg: '#e23b3b', color: '#fff', rot: -.05 });
+  label(c, 'ФАНТАСТИКА: А ЧТО ЕСЛИ…', CX, 140, { size: 46, bg: '#e23b3b', color: '#fff', rot: -.04 });
   subtitle(c, 'А что если летит не камешек,\nа настоящий гигант?', 1640);
 }
-Promise.all([document.fonts.load('800 54px Rubik','Чя')]).then(()=>defineFilm({ format: { ar: '9:16', width: 1080 }, fps: 24, timeline: [
-  { name: 'kitchen', dur: 1, fn: frameKitchen }, { name: 'flash', dur: 1, fn: frameFlash },
-  { name: 'corridor', dur: 1, fn: frameCorridor }, { name: 'space', dur: 1, fn: frameSpace } ] }));
+document.fonts.load('800 50px Rubik', 'Чя12').then(() => defineFilm({ format: { ar: '9:16', width: 1080 }, fps: 24, timeline:
+  [fKitchen, fFlash, fVera, fBlast, fCorridor, fSpace].map((fn, j) => ({ name: 's' + j, dur: 1, fn })) }));
 </script>
