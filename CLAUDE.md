@@ -84,3 +84,23 @@ For each shot, provide only what is needed:
 8. Continuity constraints
 
 Only produce the stage the user asked for. Do not output every production stage unless requested.
+
+
+### Voice and audio skills
+- `voiceover-writer`
+- `voice-acting-director`
+- `tts-producer`
+- `audio-post-production`
+- `soundscape-designer`
+
+### Voice production workflow
+Script for speech → performance direction → short TTS/actor audition → approved voice profile → line-by-line recording/generation → audio cleanup → dialogue mix → soundscape → final listening check.
+
+### Free-first voice policy
+Prefer local/open-source tools when practical. Suggested starting points:
+- Kokoro TTS: https://github.com/hexgrad/kokoro
+- Piper TTS: https://github.com/OHF-Voice/piper1-gpl
+- Audacity: https://www.audacityteam.org/
+- FFmpeg: https://ffmpeg.org/
+
+Check language support, hardware needs, exact model/voice license, and commercial-use conditions before production. Free software does not automatically make every voice model or sound asset free for commercial use. Never promise a free cloud service is unlimited.
