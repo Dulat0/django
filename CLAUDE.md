@@ -23,3 +23,64 @@
 - Файлы маленькие (до 35 строк), их можно читать целиком; исследовать репозиторий не нужно.
 - Проверка синтаксиса: `python -m py_compile <файл>` (у файлов `1.x` нет расширения `.py`).
 - Запустить код нельзя: файлы ссылаются на приложения (`.models`, `.forms`), которых здесь нет.
+
+
+# Animation Studio (2D/3D мультфильмы)
+
+Набор навыков в `.claude/skills/` (7 для 2D, 8 для 3D) используется для задач по созданию мультфильмов. Он не относится к Django-заданиям выше. Ниже правила из пакета Claude Animation Studio.
+
+
+### Purpose
+Create polished animated cartoons using either 2D hand-drawn workflows or 3D production workflows. Choose the workflow that matches the user's request; do not mix them unless asked.
+
+### Choose the pipeline
+
+#### 2D pipeline
+Story/script → storyboard/shot list → visual direction → character and environment references → scene images → image-to-video/motion → voice and sound → continuity review → final edit.
+
+#### 3D pipeline
+Story/script → storyboard/shot list → visual direction → character/environment design → modeling → rigging → blocking → animation polish → lighting/materials → preview render → continuity review → final render and sound.
+
+### Shared production principles
+- Confirm the deliverable and acceptance criteria before expanding scope.
+- Keep characters, environments, props, style, and visual continuity consistent.
+- Reuse approved references and assets; do not regenerate unchanged work.
+- Prefer clear silhouettes, readable staging, expressive acting, and simple production-friendly designs.
+- Use the minimum number of scenes, assets, tools, and iterations that achieve the requested quality.
+- Use previews and representative tests before scaling up or rendering final quality.
+- Keep explanations concise and outputs production-ready.
+- Ask only questions that block progress; otherwise use sensible defaults and state them briefly.
+- Do not claim to have generated, edited, rigged, animated, or rendered an asset unless a tool actually performed that action.
+- Be explicit when a step requires an external tool such as Blender, Maya, Cinema 4D, Unreal Engine, or an image/video generation service.
+
+### 2D skills
+- `story-director`
+- `art-director`
+- `character-designer`
+- `animation-director`
+- `continuity-manager`
+- `voice-director`
+- `efficiency-manager`
+
+### 3D skills
+- `3d-art-director`
+- `3d-character-modeler`
+- `3d-modeling-supervisor`
+- `3d-rigging-director`
+- `3d-animation-director`
+- `3d-lighting-render-supervisor`
+- `3d-continuity-manager`
+- `3d-pipeline-optimizer`
+
+### Default shot handoff
+For each shot, provide only what is needed:
+1. Shot number, duration, and framing/camera
+2. Narration/dialogue
+3. Character action and emotion
+4. Required visual assets/models/props/environment
+5. Image prompt (2D) or modeling/scene notes (3D)
+6. Motion/animation instructions
+7. Essential sound cues
+8. Continuity constraints
+
+Only produce the stage the user asked for. Do not output every production stage unless requested.
