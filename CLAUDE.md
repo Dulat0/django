@@ -104,3 +104,12 @@ Prefer local/open-source tools when practical. Suggested starting points:
 - FFmpeg: https://ffmpeg.org/
 
 Check language support, hardware needs, exact model/voice license, and commercial-use conditions before production. Free software does not automatically make every voice model or sound asset free for commercial use. Never promise a free cloud service is unlimited.
+
+### Cinematic emotional voice skills
+- `cinematic-voice-acting` — партитура исполнения: намерение, эмоция, темп, паузы, дыхание
+- `emotional-dialogue-beat-mapper` — разбивка реплик на эмоциональные биты по словам
+- `whisper-breath-vocal-performance` — шёпот, дыхание, вздохи и другие невербальные звуки
+- `cinematic-soundscape-director` — саундскейп напряжения: слои, тишина, удары, cue-лист
+- `voice-performance-quality-control` — проверка озвучки по оценкам 1–5 и правка отдельных реплик
+
+Не требовать от TTS-движка того, что он не умеет: предлагать другой движок, живого актёра или постобработку. Тревожные звуки делать сдержанно, без нагрузки на голос актёра.
